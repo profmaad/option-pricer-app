@@ -1,6 +1,5 @@
 option1 = {
     id: 23,
-    href: '#option23',    
     type: 'asian_arithmetic',
     timestamp: '2014-04-11 13:48:52',
     strike_price: 100,
@@ -15,7 +14,6 @@ option1 = {
 };
 option2 = {
     id: 42,
-    href: '#option42',
     type: 'basket_arithmetic',
     timestamp: '2014-04-10 18:33:42',
     strike_price: 100,
