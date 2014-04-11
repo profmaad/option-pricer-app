@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>OpenCL Option Pricer</title>
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/bootstrap.css">
+
+  <script src="js/libs/jquery-1.10.2.js"></script>
+  <script src="js/libs/handlebars-1.1.2.js"></script>
+  <script src="js/libs/ember-1.5.0.js"></script>
+  <script src="js/libs/bootstrap.js"></script>
+
+  <script src="js/app.js"></script>
+  <!-- to activate the test runner, add the "?test" query string parameter -->
+  <script src="tests/runner.js"></script>
+</head>
+<body>
+  <script type="text/x-handlebars">
+    <div class="container">
+      <div class="unit-centered unit-50">
+	<div class="row">
+	  <div class="page-header">
+	    <h1>
+	      OpenCL Option Pricer
+	      <small>Raw power at your fingertips</small>
+	    </h1>
+	  </div>
+	</div>
+
+	<div class="row">
+	  <button type="button" class="btn btn-default btn-block">New option</button>
+	  <hr>
+	</div>
+
+	<div class="row">
+	  <h3><small>History</small></h3>
+
+	  <div class="panel-group" id="accordion">
+	    {{outlet}}
+	  </div>
+
+	</div>
+      </div>
+    </div>
+  </script>
+  
+
+  <script type="text/x-handlebars" id="options">
+    {{#each option in model itemController="option"}}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	<h4 class="panel-title">
+	  <a data-toggle="collapse" data-parent="#accordion" {{bind-attr href=option.panel_href}}>
+	    {{option.type_string}} option <small>{{option.timestamp}}</small>
+	  </a>
+	</h4>
+      </div>
+      <div {{bind-attr id=option.panel_id}} class="panel-collapse collapse">
+	<div class="panel-body">
+
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Option Parameters</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<tr>
+		  <th class="col-sm-1">Strike Price</th>
+		  <td class="col-sm-2">{{option.strike_price}} <span class="text-muted">HKD</span></td>
+		</tr>
+		<tr>
+		  <th>Maturity</th>
+		  <td>{{option.maturity}} <span class="text-muted">years</span></td>
+		</tr>
+		<tr>
+		  <th>Risk-free rate</th>
+		  <td>{{option.risk_free_rate}} %</td>
+		</tr>
+		{{#if option.averaging_steps}}
+		<tr>
+		  <th>Averaging steps</th>
+		  <td>{{option.averaging_steps}}</td>
+		</tr>
+		{{/if}}
+	      </table>
+	    </div>
+	  </div>
+
+	  {{#if option.is_basket}}
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Asset Parameters</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<thead>
+		  <tr>
+		    <th class="col-sm-1" />
+		    <th class="col-sm-2">Start Price</th>
+		    <th class="col-sm-3">Volatility</th>
+		</thead>
+		
+		<tbody>
+		  {{#each asset in option.assets}}
+		  <tr>
+		    <th>#{{asset.index}}</th>
+		    <td>{{asset.start_price}} <span class="text-muted">HKD</span></td>
+		    <td>{{asset.volatility}} %</td>
+		  </tr>
+		  {{/each}}
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Asset Correlations</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<thead>
+		  <tr>
+		    <th class="col-sm-1"></th>
+		    {{#each asset in option.assets}}
+		    <th {{bind-attr class=asset.correlations_column}}>#{{asset.index}}</th>
+		    {{/each}}
+		  </tr>
+		</thead>
+		
+		<tbody>
+		  {{#each asset in option.assets}}
+		  <tr>
+		    <th>#{{asset.index}}</th>
+		    {{#each correlation in asset.correlations}}
+		    <td {{bind-attr class="correlation.text_muted"}}>{{correlation.value}} %</td>
+		    {{/each}}
+		  </tr>
+		  {{/each}}
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+	  {{else}}
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Asset Parameters</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<tr>
+		  <th class="col-sm-1">Start Price</th>
+		  <td class="col-sm-2">{{option.start_price}} <span class="text-muted">HKD</span></td>
+		</tr>
+		<tr>
+		  <th>Volatility</th>
+		  <td>{{option.volatility}} %</td>
+		</tr>
+	      </table>
+	    </div>
+	  </div>
+	  {{/if}}
+
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Pricing Results</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<tr>
+		  <th class="col-sm-1">Option Price</th>
+		  <td class="col-sm-2">{{option.price}} <span class="text-muted">HKD</span></td>
+		</tr>
+		<tr>
+		  <th>Confidence Interval</th>
+		  <td>{{option.confidence_interval.[0]}} - {{option.confidence_interval.[1]}} HKD ({{interval_size option.confidence_interval}} HKD)</td>
+		</tr>
+		{{#if option.is_monte_carlo}}
+		<tr>
+		  <th>Monte Carlo samples</th>
+		  <td>{{option.samples}}</td>
+		</tr>
+		{{/if}}
+	      </table>
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </div>
+    {{/each}}
+  </script>
+</body>
+</html>
