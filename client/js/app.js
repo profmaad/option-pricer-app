@@ -35,7 +35,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	    var number_of_assets = parseInt(this.get('number_of_assets'));
 
 	    var option = this.store.createRecord('option', {
-		id: '<<EDITING>>',
+		id: Date.now().toString(),
 		type: type,
 		number_of_assets: number_of_assets,
 		timestamp: Date.now().toString(),
@@ -69,11 +69,73 @@ App.OptionsEditController = Ember.Controller.extend({
 	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
     ],
     is_basket: function() {
-	if(this.get('type') && this.get('type').search('^basket') >= 0) { return true; }
+	if(this.get('model.type') && this.get('model.type').search('^basket') >= 0) { return true; }
 	else { return false; }
-    }.property('type'),
+    }.property('model.type'),
+    is_asian: function() {
+	if(this.get('model.type') && this.get('model.type').search('^asian') >= 0) { return true; }
+	else { return false; }
+    }.property('model.type'),
+    assets: function() {
+	if(this.get('is_basket'))
+	{
+	    var assets = [];
+
+	    for(var asset = 0; asset < this.get('model.number_of_assets'); asset++)
+	    {
+		var raw_correlations = this.get('model.correlations')[asset];
+		var correlations = new Array(this.get('model.number_of_assets'));
+		if(!(raw_correlations === undefined))
+		{
+		    for(var c = 0; c < raw_correlations.length; c++)
+		    {
+			correlations.push({
+			    value: raw_correlations[c] * 100,
+			    text_muted: (c <= asset),
+			});
+		    }
+		}
+		
+		assets.push({
+		    index: asset+1,
+		    correlations_column: 'col-sm-'+(asset+2).toString(),
+		    start_price: this.get('model.start_prices')[asset],
+		    volatility: this.get('model.volatilities')[asset],
+		    correlations: correlations,
+		    start_price_field: 'start_prices_' + asset.toString(),
+		    volatility_field: 'volatilities_' + asset.toString(),
+		});
+	    }
+
+	    return assets;
+	}
+	else
+	{
+	    return [{
+		index: 1,
+		correlations_column: 'col-sm-2',
+		start_price: this.get('start_price'),
+		volatility: this.get('volatility')
+	    }];
+	}
+    }.property(),
 
     actions: {
+	save_option: function () {
+	    console.log(this.get('start_prices[]'));
+	    console.log(this.get('volatilities[]'));
+
+	    var start_prices = new Array(this.get('model.number_of_assets'));
+	    var volatilities = new Array(this.get('model.number_of_assets'));
+	    for(var asset = 0; asset < this.get('model.number_of_assets'); asset++)
+	    {
+		start_prices[asset] = this.get('start_prices_' + asset.toString());
+		volatilities[asset] = this.get('volatilities_' + asset.toString());
+	    }
+
+	    console.log(start_prices);
+	    console.log(volatilities);
+	},
     },
 });
 
@@ -117,14 +179,14 @@ App.OptionController = Ember.ObjectController.extend({
 	else { return false; }
     }.property(),
     number_of_assets: function() {
-	if(this.get('is_basket'))
-	{
-	    return Math.min.apply(null, [this.get('start_prices').length, this.get('volatilities').length, this.get('correlations').length]);
-	}
-	else
-	{
-	    return 1;
-	}
+    	if(this.get('is_basket'))
+    	{
+    	    return Math.min.apply(null, [this.get('start_prices').length, this.get('volatilities').length, this.get('correlations').length]);
+    	}
+    	else
+    	{
+    	    return 1;
+    	}
     }.property(),
     assets: function() {
 	if(this.get('is_basket'))

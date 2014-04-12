@@ -42,15 +42,99 @@
 
   <script type="text/x-handlebars" id="options/edit">
     <div class="panel panel-default">
-      <div class="panel-heading">Edit Option Parameters</div>
+      <div class="panel-heading">Edit Option</div>
       <div class="panel-body">
 	<form class="form-horizontal">
-	  <div class="form-group">
-	    <label for="strike-price" class="col-sm-2 control-label">Strike Price</label>
-	    <div class="col-sm-4">
-	      {{input type="number" id="strike-price" class="form-control" value=strike_price}} 
+	  <fieldset>
+	    <legend>Option Parameters</legend>
+	    <div class="form-group">
+	      <label for="strike-price" class="col-sm-2 control-label">Strike Price</label>
+	      <div class="col-sm-4">
+		<div class="input-group">
+		  {{input type="number" id="strike-price" class="form-control" value=strike_price}}
+		  <span class="input-group-addon">HKD</span>
+		</div>
+	      </div>
 	    </div>
-	  </div>
+	    <div class="form-group">
+	      <label for="maturity" class="col-sm-2 control-label">Maturity</label>
+	      <div class="col-sm-4">
+		<div class="input-group">
+		  {{input type="number" id="maturity" class="form-control" value=maturity}} 
+		  <span class="input-group-addon">years</span>
+		</div>
+	      </div>
+	    </div>
+	    <div class="form-group">
+	      <label for="risk-free-rate" class="col-sm-2 control-label">Risk-free rate</label>
+	      <div class="col-sm-4">
+		<div class="input-group">
+		  {{input type="number" id="risk-free-rate" class="form-control" value=risk_free_rate}} 
+		  <span class="input-group-addon">%</span>
+		</div>
+	      </div>
+	    </div>
+	    {{#if is_asian}}
+	    <div class="form-group">
+	      <label for="averaging-steps" class="col-sm-2 control-label">Averaging steps</label>
+	      <div class="col-sm-4">
+		{{input type="number" id="averaging-steps" class="form-control" value=averaging_steps}} 
+	      </div>
+	    </div>
+	    {{/if}}
+	  </fieldset>
+
+	  <fieldset>
+	    <legend>Asset Parameters</legend>
+	    {{#if is_basket}}
+	    <table class="table">
+	      <thead>
+		<tr>
+		  <th class="col-sm-1" />
+		  <th class="col-sm-2">Start Price</th>
+		  <th class="col-sm-3">Volatility</th>
+	      </thead>
+	      
+	      <tbody>
+		{{#each asset in assets}}
+		<tr>
+		  <th>#{{asset.index}}</th>
+		  <td>
+		    <div class="input-group">
+		      {{input type="number" id=asset.start_price_field class="form-control" value="start_prices[]"}}
+		      <span class="input-group-addon">HKD</span>
+		    </div>
+		  </td>
+		  <td>
+		    <div class="input-group">
+		      {{input type="number" id=asset.volatility_field class="form-control" value="volatilities[]"}}
+		      <span class="input-group-addon">%</span>
+		    </div>
+		  </td>
+		</tr>
+		{{/each}}
+	      </tbody>
+	    </table>	    
+	    {{else}}
+	    <div class="form-group">
+	      <label for="start-price" class="col-sm-2 control-label">Start Price</label>
+	      <div class="col-sm-4">
+		<div class="input-group">
+		  {{input type="number" id="start-price" class="form-control" value="start_prices[]"}}
+		  <span class="input-group-addon">HKD</span>
+		</div>
+	      </div>
+	    </div>
+	    <div class="form-group">
+	      <label for="volatility" class="col-sm-2 control-label">Volatility</label>
+	      <div class="col-sm-4">
+		<div class="input-group">
+		  {{input type="number" id="volatility" class="form-control" value="volatilities[]"}}
+		  <span class="input-group-addon">%</span>
+		</div>
+	      </div>
+	    </div>
+	    {{/if}}
 
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-4">
