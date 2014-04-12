@@ -1,19 +1,19 @@
 App.Option = DS.Model.extend({
-    option_id: DS.attr('string'),
+    _id: DS.attr('string'),
     type: DS.attr('string'),
     timestamp: DS.attr('string'),
-    strike_price: DS.attr('float'),
-    maturity: DS.attr('float'),
-    risk_free_rate: DS.attr('float'),
-    start_price: DS.attr('float'),
+    strike_price: DS.attr('number'),
+    maturity: DS.attr('number'),
+    risk_free_rate: DS.attr('number'),
+    start_price: DS.attr('number'),
     start_prices: DS.attr('array'),
-    volatility: DS.attr('float'),
+    volatility: DS.attr('number'),
     volatilities: DS.attr('array'),
     correlations: DS.attr('array'),
-    number_of_assets: DS.attr('int'),
-    price: DS.attr('float'),
+    number_of_assets: DS.attr('number'),
+    price: DS.attr('number'),
     confidence_interval: DS.attr('array'),
-    samples: DS.attr('int'),
+    samples: DS.attr('number'),
 });
 
 App.Option.FIXTURES = [

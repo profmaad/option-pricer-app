@@ -1,5 +1,20 @@
 App = Ember.Application.create({LOG_TRANSITIONS: true, LOG_TRANSITIONS_INTERNAL: true});
-App.ApplicationAdapter = DS.FixtureAdapter.extend();
+//App.ApplicationAdapter = DS.FixtureAdapter.extend();
+App.ApplicationAdapter = DS.RESTAdapter.extend({
+    namespace: 'api',
+});
+App.ApplicationSerializer = DS.RESTSerializer.extend({
+  primaryKey: "_id"
+});
+
+App.ArrayTransform = DS.Transform.extend({
+    deserialize: function(serialized) {
+	return Em.isNone(serialized) ? [] : serialized;
+    },
+    serialize: function(deserialized) {
+	return Em.isNone(deserialized) ? [] : deserialized;
+    },
+});
 
 App.OptionsNewController = Ember.Controller.extend({
     option_types: [
@@ -45,10 +60,10 @@ App.OptionsNewController = Ember.Controller.extend({
 
 App.OptionController = Ember.ObjectController.extend({
     panel_href: function() {
-	return '#option' + this.get('option_id');
+	return '#option' + this.get('id');
     }.property(),
     panel_id: function() {
-	return 'option' + this.get('option_id');
+	return 'option' + this.get('id');
     }.property(),
     type_string: function() {
 	switch(this.get('type'))
@@ -130,6 +145,12 @@ App.OptionController = Ember.ObjectController.extend({
 	    }];
 	}
     }.property(),
+    start_price: function() {
+	return this.get('start_prices')[0];
+    }.property('model.start_prices'),
+    volatility: function() {
+	return this.get('volatilities')[0];
+    }.property('model.volatilities'),
 });
 
 App.Router.map(function() {
