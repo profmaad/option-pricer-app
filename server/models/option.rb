@@ -5,6 +5,8 @@ class Option
   field :direction, type: String
   field :control_variate, type: String
   field :timestamp, type: DateTime
+  field :completed, type: Boolean
+  field :priced, type: Boolean
 
   field :strike_price, type: Float
   field :maturity, type: Float

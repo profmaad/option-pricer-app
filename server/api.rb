@@ -27,6 +27,8 @@ if(Option.all.size == 0)
                    price: 8.23,
                    confidence_interval: [8.22, 8.24],
                    samples: 10000000,
+                   completed: true,
+                   priced: true,
                  },
                  {
                    type: 'asian_arithmetic',
@@ -42,6 +44,8 @@ if(Option.all.size == 0)
                    price: 14.547,
                    confidence_interval: [14.5, 14.6],
                    samples: 10000000,
+                   completed: true,
+                   priced: true,
                  },
                  {
                    type: 'basket_arithmetic',
@@ -56,6 +60,8 @@ if(Option.all.size == 0)
                    price: 23.4242,
                    confidence_interval: [23.4, 23.44],
                    samples: 10000000,
+                   completed: true,
+                   priced: true,
                  },
                 ])
 end
@@ -63,7 +69,13 @@ end
 get '/api/options', :provides => :json do
   content_type :json
 
-  options = Option.desc(:timestamp)
+  completed_query = (params[:completed] == 'true')
+
+  if(params[:completed])
+    options = Option.where(completed: completed_query).desc(:timestamp)
+  else
+    options = Option.desc(:timestamp)
+  end
 
   return {options: options}.to_json
 end

@@ -35,6 +35,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	    var number_of_assets = parseInt(this.get('number_of_assets'));
 
 	    var option = this.store.createRecord('option', {
+		id: '',
 		type: type,
 		number_of_assets: number_of_assets,
 		timestamp: Date.now().toString(),
@@ -50,9 +51,12 @@ App.OptionsNewController = Ember.Controller.extend({
 		price: 0,
 		confidence_interval: [0,0],
 		samples: 0,
+		completed: false,
+		priced: false,
 	    });
 
-	    option.save();
+	    this.store.push('option', option);
+	    this.transitionToRoute('options.index');	    
 	},
     },
 });
@@ -160,8 +164,7 @@ App.Router.map(function() {
 
 App.OptionsRoute = Ember.Route.extend({
     model: function() {
-	return this.store.find('option');
-	//return App.Option.all();
+	return this.store.find('option', {completed: true});
     }
 });
 

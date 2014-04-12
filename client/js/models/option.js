@@ -14,6 +14,8 @@ App.Option = DS.Model.extend({
     price: DS.attr('number'),
     confidence_interval: DS.attr('array'),
     samples: DS.attr('number'),
+    completed: DS.attr('boolean'),
+    priced: DS.attr('boolean'),
 });
 
 App.Option.FIXTURES = [
