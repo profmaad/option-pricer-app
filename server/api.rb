@@ -30,7 +30,7 @@ if(Option.all.size == 0)
                  },
                  {
                    type: 'asian_arithmetic',
-                   timestamp: Time.now,
+                   timestamp: Time.now - 60,
                    strike_price: 100.0,
                    maturity: 3.0,
                    risk_free_rate: 5.0,
@@ -45,7 +45,7 @@ if(Option.all.size == 0)
                  },
                  {
                    type: 'basket_arithmetic',
-                   timestamp: Time.now,
+                   timestamp: Time.now - 10*60,
                    strike_price: 100.0,
                    maturity: 3.0,
                    risk_free_rate: 5.0,
