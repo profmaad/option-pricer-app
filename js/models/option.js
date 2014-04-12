@@ -1,5 +1,5 @@
 App.Option = DS.Model.extend({
-    id: DS.attr('string'),
+    option_id: DS.attr('string'),
     type: DS.attr('string'),
     timestamp: DS.attr('string'),
     strike_price: DS.attr('float'),
@@ -18,6 +18,7 @@ App.Option = DS.Model.extend({
 App.Option.FIXTURES = [
     {
 	id: '23',
+	option_id: '23',
 	type: 'asian_arithmetic',
 	timestamp: '2014-04-11 13:48:52',
 	strike_price: 100,
@@ -32,6 +33,7 @@ App.Option.FIXTURES = [
     },
     {
 	id: '42',
+	option_id: '42',
 	type: 'basket_arithmetic',
 	timestamp: '2014-04-10 18:33:42',
 	strike_price: 100,
@@ -43,5 +45,18 @@ App.Option.FIXTURES = [
 	price: 14.547,
 	confidence_interval: [14.5, 14.6],
 	samples: 10000000,
+    },
+    {
+	id: '65',
+	option_id: '65',
+	type: 'european',
+	timestamp: '2014-04-12 12:12:23',
+	strike_price: 100,
+	maturity: 3,
+	risk_free_rate: 5,
+	start_price: 100,
+	volatility: 70,
+	price: 2.34,
+	confidence_interval: [2.34, 2.34],
     },
 ];

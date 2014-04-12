@@ -1,54 +1,12 @@
-option1 = {
-    id: 23,
-    type: 'asian_arithmetic',
-    timestamp: '2014-04-11 13:48:52',
-    strike_price: 100,
-    maturity: 3,
-    risk_free_rate: 5,
-    averaging_steps: 50,
-    start_price: 100,
-    volatility: 30,
-    price: 14.547,
-    confidence_interval: [14.5, 14.6],
-    samples: 10000000,
-};
-option2 = {
-    id: 42,
-    type: 'basket_arithmetic',
-    timestamp: '2014-04-10 18:33:42',
-    strike_price: 100,
-    maturity: 3,
-    risk_free_rate: 5,
-    start_prices: [100, 90, 110],
-    volatilities: [30, 15, 10],
-    correlations: [[1.0, 0.8, 0.5], [0.8, 1.0, 0.3], [0.5, 0.3, 1.0]],
-    price: 14.547,
-    confidence_interval: [14.5, 14.6],
-    samples: 10000000,
-};
-DEFAULT_OPTIONS = [option1, option2];
-
 App = Ember.Application.create({LOG_TRANSITIONS: true, LOG_TRANSITIONS_INTERNAL: true});
-
-App.Option = Ember.Object.extend()
-App.Option.reopenClass({
-    all: function () {
-	var options = [];
-
-	DEFAULT_OPTIONS.forEach( function(option) {
-	    options.push(App.Option.create(option));
-	});
-
-	return options;
-    }
-});
+App.ApplicationAdapter = DS.FixtureAdapter.extend();
 
 App.OptionController = Ember.ObjectController.extend({
     panel_href: function() {
-	return '#option' + this.get('id');
+	return '#option' + this.get('option_id');
     }.property(),
     panel_id: function() {
-	return 'option' + this.get('id');
+	return 'option' + this.get('option_id');
     }.property(),
     type_string: function() {
 	switch(this.get('type'))
@@ -138,7 +96,8 @@ App.Router.map(function() {
 
 App.OptionsRoute = Ember.Route.extend({
     model: function() {
-	return App.Option.all();
+	return this.store.find('option');
+	//return App.Option.all();
     }
 });
 
