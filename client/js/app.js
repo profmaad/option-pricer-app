@@ -51,7 +51,6 @@ App.OptionsNewController = Ember.Controller.extend({
 		confidence_interval: [0,0],
 		samples: 0,
 	    });
-	    console.log(option.toString());
 
 	    option.save();
 	},
