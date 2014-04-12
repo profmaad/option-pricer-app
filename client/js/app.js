@@ -35,7 +35,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	    var number_of_assets = parseInt(this.get('number_of_assets'));
 
 	    var option = this.store.createRecord('option', {
-		id: '',
+		id: '<<EDITING>>',
 		type: type,
 		number_of_assets: number_of_assets,
 		timestamp: Date.now().toString(),
@@ -56,8 +56,24 @@ App.OptionsNewController = Ember.Controller.extend({
 	    });
 
 	    this.store.push('option', option);
-	    this.transitionToRoute('options.index');	    
+	    this.transitionToRoute('options.edit', option.id);
 	},
+    },
+});
+App.OptionsEditController = Ember.Controller.extend({
+    option_types: [
+	{name: 'European', code: 'european'},
+	{name: 'Geometric Asian', code: 'asian_geometric'},
+	{name: 'Arithmetic Asian', code: 'asian_arithmetic'},
+	{name: 'Geometric Basket', code: 'basket_geometric'},
+	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
+    ],
+    is_basket: function() {
+	if(this.get('type') && this.get('type').search('^basket') >= 0) { return true; }
+	else { return false; }
+    }.property('type'),
+
+    actions: {
     },
 });
 
@@ -159,6 +175,8 @@ App.OptionController = Ember.ObjectController.extend({
 App.Router.map(function() {
     this.resource('options', {path: '/'}, function() {
 	this.route('new');
+	this.route('edit', {path: '/edit/:option_id'});
+	this.route('price');
     });
 });
 
