@@ -1,6 +1,48 @@
 App = Ember.Application.create({LOG_TRANSITIONS: true, LOG_TRANSITIONS_INTERNAL: true});
 App.ApplicationAdapter = DS.FixtureAdapter.extend();
 
+App.OptionsNewController = Ember.Controller.extend({
+    option_types: [
+	{name: 'European', code: 'european'},
+	{name: 'Geometric Asian', code: 'asian_geometric'},
+	{name: 'Arithmetic Asian', code: 'asian_arithmetic'},
+	{name: 'Geometric Basket', code: 'basket_geometric'},
+	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
+    ],
+    is_basket: function() {
+	if(this.get('type') && this.get('type').search('^basket') >= 0) { return true; }
+	else { return false; }
+    }.property('type'),
+
+    actions: {
+	create_option: function () {
+	    var type = this.get('type');
+	    var number_of_assets = parseInt(this.get('number_of_assets'));
+
+	    var option = this.store.createRecord('option', {
+		type: type,
+		number_of_assets: number_of_assets,
+		timestamp: Date.now().toString(),
+		option_id: Date.now().toString(),
+		strike_price: 0,
+		maturity: 0,
+		risk_free_rate: 0,
+		start_price: 0,
+		start_prices: [],
+		volatility: 0,
+		volatilities: [],
+		correlations: [],
+		price: 0,
+		confidence_interval: [0,0],
+		samples: 0,
+	    });
+	    console.log(option.toString());
+
+	    option.save();
+	},
+    },
+});
+
 App.OptionController = Ember.ObjectController.extend({
     panel_href: function() {
 	return '#option' + this.get('option_id');
@@ -91,7 +133,9 @@ App.OptionController = Ember.ObjectController.extend({
 });
 
 App.Router.map(function() {
-    this.resource('options', {path: '/'});
+    this.resource('options', {path: '/'}, function() {
+	this.route('new');
+    });
 });
 
 App.OptionsRoute = Ember.Route.extend({

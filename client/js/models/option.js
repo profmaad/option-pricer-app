@@ -10,6 +10,7 @@ App.Option = DS.Model.extend({
     volatility: DS.attr('float'),
     volatilities: DS.attr('array'),
     correlations: DS.attr('array'),
+    number_of_assets: DS.attr('int'),
     price: DS.attr('float'),
     confidence_interval: DS.attr('array'),
     samples: DS.attr('int'),

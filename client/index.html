@@ -40,10 +40,40 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars" id="options/new">
+    <div class="panel panel-default">
+      <div class="panel-heading">New Option</div>
+      <div class="panel-body">
+	<form class="form-horizontal">
+	  <div class="form-group">
+	    <label for="option-type" class="col-sm-2 control-label">Type</label>
+	    <div class="col-sm-4">
+	      {{view Ember.Select class="form-control" id="option-type" content=option_types optionValuePath="content.code" optionLabelPath="content.name" value=type}}
+	    </div>
+	  </div>
 
-  <script type="text/x-handlebars" id="options">
+	  {{#if is_basket}}
+	  <div class="form-group">
+	    <label for="number-of-assets" class="col-sm-2 control-label">Assets</label>
+	    <div class="col-sm-4">
+	      {{input type="number" id="number-of-assets" class="form-control" value=number_of_assets}} 
+	    </div>
+	  </div>
+	  {{/if}}
+
+	  <div class="form-group">
+	    <div class="col-sm-offset-2 col-sm-4">
+	      <button {{action create_option}} type="submit" class="btn btn-default">Create</button>
+	    </div>
+	  </div>
+	</form>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/x-handlebars" id="options/index">
     <div class="row">
-      <button type="button" class="btn btn-default btn-block">New option</button>
+      <a type="button" class="btn btn-lg btn-default btn-block" href="#/new">New option</a>
       <hr>
     </div>
 
