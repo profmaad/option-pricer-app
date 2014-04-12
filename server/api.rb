@@ -82,8 +82,9 @@ end
 get '/api/options/:id', :provides => :json do
   content_type :json
 
-  option = Option.find(params[:id])
+  option = Option.where(_id: params[:id]).first
 
+  status 404
   return {option: option}.to_json
 end
 
