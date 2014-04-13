@@ -1,9 +1,9 @@
 App.Option = DS.Model.extend({
     _id: DS.attr('string'),
 
-    type: DS.attr('string'),
-    direction: DS.attr('string'),
-    control_variate: DS.attr('string'),
+    type: DS.attr('string', {defaultValue: 'european'}),
+    direction: DS.attr('string', {defaultValue: 'call'}),
+    control_variate: DS.attr('string', {defaultValue: 'none'}),
 
     timestamp: DS.attr('date'),
 

@@ -9,12 +9,14 @@
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/bootstrap-switch.css">
 
   <script src="js/libs/jquery-1.10.2.js"></script>
   <script src="js/libs/handlebars-1.1.2.js"></script>
   <script src="js/libs/ember-1.5.0.js"></script>
   <script src="js/libs/ember-data.js"></script>
   <script src="js/libs/bootstrap.js"></script>
+  <script src="js/libs/bootstrap-switch.js"></script>
 
   <script src="js/app.js"></script>
   <script src="js/models/option.js"></script>
@@ -151,6 +153,17 @@
 	      </div>
 	    </div>
 	    {{/if}}
+	  </fieldset>
+	  
+	  <fieldset>
+	    <legend>Pricing Parameters</legend>
+	    <div class="form-group">
+	      <label for="option-direction" class="col-sm-2 control-label">Direction</label>
+	      <div class="col-sm-4">
+		{{view App.SwitchView id="option-direction" value=bool_direction offText="Call" onText="Put" onColor="warning" offColor="success"}}
+	      </div>
+	    </div>
+
 
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-4">
@@ -307,6 +320,10 @@
 	{{/each}}
       </div>      
     </div>    
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="bootstrap-switch">
+    {{view Ember.Checkbox class="ember-bootstrap-switch" data-on-text=view.onText data-off-text=view.offText data-on-color=view.onColor data-off-color=view.offColor checked=view.value}}
   </script>
 </body>
 </html>

@@ -110,6 +110,33 @@ App.OptionsNewController = Ember.Controller.extend({
 	    this.get('model.assets').objectAt(0).set('volatility', value);
 	}
     }.property('model.assets.@each.volatility'),
+    bool_direction: function(key, value) {
+	console.log('BOOL_DIRECTION');
+	console.log(key);
+	console.log(value);
+	if(value === undefined)
+	{	
+	    if(this.get('model.direction') == 'call')
+	    {
+		return false;
+	    }
+	    else
+	    {
+		return true;
+	    }
+	}
+	else
+	{
+	    if(value == true)
+	    {
+		this.set('model.direction', 'put');
+	    }
+	    else
+	    {
+		this.set('model.direction', 'call');
+	    }
+	}
+    }.property('model.direction'),
     actions: {
 	add_asset: function() {
 	    this.get('model.assets').pushObject(this.store.createRecord('asset', {
@@ -261,4 +288,27 @@ Ember.Handlebars.helper('index1', function(value, options) {
 Ember.Handlebars.helper('unit', function(unit, options) {
     var escaped = Handlebars.Utils.escapeExpression(unit);
     return new Handlebars.SafeString('<span class="text-muted">' + escaped + '</span>');
+});
+
+Ember.Checkbox.reopen({
+    attributeBindings: ['data-on-text', 'data-off-text', 'data-on-color', 'data-off-color'],
+});
+App.SwitchView = Ember.View.extend({
+    templateName: 'bootstrap-switch',
+    element_selector: '.ember-bootstrap-switch',
+    onText: 'ON',
+    offText: 'OFF',
+    onColor: 'primary',
+    offColor: 'default',
+    didInsertElement: function() {
+	var view = this;
+	this.$(this.get('element_selector')).bootstrapSwitch();
+	this.$(this.get('element_selector')).on('switchChange.bootstrapSwitch', function(event, state) {
+	    view.set('value', state);
+	});
+    },
+    toggleState: function () {
+	this.$(this.get('element_selector')).bootstrapSwitch('toggleState');
+	return this;
+    },    
 });
