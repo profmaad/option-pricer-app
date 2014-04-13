@@ -28,8 +28,8 @@
 	<div class="row">
 	  <div class="page-header">
 	    <h1>
-	      OpenCL Option Pricer
-	      <small>Raw power at your fingertips</small>
+	      {{title}}
+	      <small>{{tagline}}</small>
 	    </h1>
 	  </div>
 	</div>
@@ -204,11 +204,11 @@
 		  <table class="table">
 		    <tr>
 		      <th class="col-sm-1">Strike Price</th>
-		      <td class="col-sm-2">{{option.strike_price}} <span class="text-muted">HKD</span></td>
+		      <td class="col-sm-2">{{option.strike_price}} {{unit "HKD"}}</td>
 		    </tr>
 		    <tr>
 		      <th>Maturity</th>
-		      <td>{{option.maturity}} <span class="text-muted">years</span></td>
+		      <td>{{option.maturity}} {{unit "years"}}</td>
 		    </tr>
 		    <tr>
 		      <th>Risk-free rate</th>
@@ -240,7 +240,7 @@
 		      {{#each asset in option.assets}}
 		      <tr>
 			<th>#{{asset.index}}</th>
-			<td>{{asset.start_price}} <span class="text-muted">HKD</span></td>
+			<td>{{asset.start_price}} {{unit "HKD"}}</td>
 			<td>{{asset.volatility}} %</td>
 		      </tr>
 		      {{/each}}
@@ -282,7 +282,7 @@
 		  <table class="table">
 		    <tr>
 		      <th class="col-sm-1">Start Price</th>
-		      <td class="col-sm-2">{{option.start_price}} <span class="text-muted">HKD</span></td>
+		      <td class="col-sm-2">{{option.start_price}} {{unit "HKD"}}</td>
 		    </tr>
 		    <tr>
 		      <th>Volatility</th>
@@ -299,11 +299,11 @@
 		  <table class="table">
 		    <tr>
 		      <th class="col-sm-1">Option Price</th>
-		      <td class="col-sm-2">{{option.price}} <span class="text-muted">HKD</span></td>
+		      <td class="col-sm-2">{{option.price}} {{unit "HKD"}}</td>
 		    </tr>
 		    <tr>
 		      <th>Confidence Interval</th>
-		      <td>{{option.confidence_interval.[0]}} - {{option.confidence_interval.[1]}} HKD ({{interval_size option.confidence_interval}} HKD)</td>
+		      <td>{{option.confidence_interval.[0]}} - {{option.confidence_interval.[1]}} {{unit "HKD"}} ({{interval_size option.confidence_interval}} {{unit "HKD"}})</td>
 		    </tr>
 		    {{#if option.is_monte_carlo}}
 		    <tr>

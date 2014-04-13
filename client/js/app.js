@@ -1,10 +1,14 @@
 App = Ember.Application.create({LOG_TRANSITIONS: true, LOG_TRANSITIONS_INTERNAL: true});
-//App.ApplicationAdapter = DS.FixtureAdapter.extend();
 App.ApplicationAdapter = DS.RESTAdapter.extend({
     namespace: 'api',
 });
 App.ApplicationSerializer = DS.RESTSerializer.extend({
   primaryKey: "_id"
+});
+
+App.ApplicationController = Ember.Controller.extend({
+    title: 'OpenCL Option Pricer',
+    tagline: 'Raw power at your fingertips',
 });
 
 App.ArrayTransform = DS.Transform.extend({
@@ -259,4 +263,9 @@ Ember.Handlebars.helper('interval_size', function(interval, options) {
 
 Ember.Handlebars.helper('percentage', function(value, options) {
     return +(value*100).toFixed(5);
+});
+
+Ember.Handlebars.helper('unit', function(unit, options) {
+    var escaped = Handlebars.Utils.escapeExpression(unit);
+    return new Handlebars.SafeString('<span class="text-muted">' + escaped + '</span>');
 });
