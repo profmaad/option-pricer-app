@@ -24,6 +24,16 @@ App.OptionsNewRoute = Ember.Route.extend({
 	return new_model;
     }
 });
+
+App.AssetController = Ember.ObjectController.extend({
+    needs: 'option',
+    can_be_removed: function() {
+	var is_last = this.get('index') == (this.get('option.assets.length')-1);
+	var is_only = this.get('option.assets.length') == 1;
+	return (is_last && !is_only);
+    }.property('index', 'option.assets.@each'),
+});
+
 App.OptionsNewController = Ember.Controller.extend({
     option_types: [
 	{name: 'European', code: 'european'},
@@ -33,7 +43,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
     ],
     is_basket: function() {
-	if(this.get('model.type') && this.get('model.type').search('^basket') >= 0) { this.get('model.assets').pushObject(this.store.createRecord('asset', {index:0})); return true; }
+	if(this.get('model.type') && this.get('model.type').search('^basket') >= 0) { return true; }
 	else { return false; }
     }.property('model.type'),
     is_asian: function() {
@@ -101,14 +111,31 @@ App.OptionsNewController = Ember.Controller.extend({
 	}
     }.property('model.assets.@each.volatility'),
     actions: {
-	create_option: function() {
-	    console.log(this.get('model.risk_free_rate'));
-	    console.log(this.get('model.assets').objectAt(0).get('start_price'));
-	    console.log(this.get('model.assets').objectAt(0).get('volatility'));
+	add_asset: function() {
+	    this.get('model.assets').pushObject(this.store.createRecord('asset', {
+		index: this.get('model.assets.length')
+	    })); 
+	},
+	remove_last_asset: function() {
 	    if(this.get('model.assets.length') > 1)
 	    {
-		console.log(this.get('model.assets').objectAt(1).get('start_price'));
-		console.log(this.get('model.assets').objectAt(1).get('volatility'));
+		this.get('model.assets').removeAt(this.get('model.assets.length')-1);
+	    }
+	},
+	create_option: function() {
+	    console.log(this.get('model.type'));
+	    console.log(this.get('model.direction'));
+	    console.log(this.get('model.control_variate'));
+
+	    console.log(this.get('model.strike_price'));
+	    console.log(this.get('model.maturity'));
+	    console.log(this.get('model.risk_free_rate'));
+	    console.log(this.get('model.averaging_steps'));
+	    
+	    for(var asset = 0; asset < this.get('model.assets.length'); asset++)
+	    {
+		console.log(this.get('model.assets').objectAt(asset).get('start_price'));
+		console.log(this.get('model.assets').objectAt(asset).get('volatility'));
 	    }
 	}
     },

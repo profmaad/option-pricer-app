@@ -91,7 +91,12 @@
 	  </fieldset>
 
 	  <fieldset>
-	    <legend>Asset Parameters</legend>
+	    <legend>
+	      Asset Parameters
+	      {{#if is_basket}}
+	      <button {{action add_asset}} type="button" class="btn btn-default btn-sm pull-right"><span class="glyphicon glyphicon-plus"></span></button>
+	      {{/if}}
+	    </legend>
 	    {{#if is_basket}}
 	    <table class="table">
 	      <thead>
@@ -102,9 +107,14 @@
 	      </thead>
 	      
 	      <tbody>
-		{{#each asset in model.assets}}
+		{{#each asset in model.assets itemController="asset"}}
 		<tr>
-		  <th>#{{index1 asset.index}}</th>
+		  <th>
+		    #{{index1 asset.index}}
+		    {{#if can_be_removed}}
+		    <button {{action remove_last_asset}} type="button" class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
+		    {{/if}}
+		  </th>
 		  <td>
 		    <div class="input-group">
 		      {{input type="number" class="form-control" value=asset.start_price}}
