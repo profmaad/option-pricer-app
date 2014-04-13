@@ -16,7 +16,7 @@ App.Option = DS.Model.extend({
     
     price: DS.attr('number'),
     confidence_interval: DS.attr('array'),
-    samples: DS.attr('number'),
+    samples: DS.attr('number', {defaultValue: 6}),
 
     completed: DS.attr('boolean'),
     priced: DS.attr('boolean'),

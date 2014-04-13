@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/normalize.css">
   <link rel="stylesheet" href="css/bootstrap.css">
   <link rel="stylesheet" href="css/bootstrap-switch.css">
+  <link rel="stylesheet" href="css/bootstrap-slider.css">
   <link rel="stylesheet" href="css/style.css">
 
   <script src="js/libs/jquery-1.10.2.js"></script>
@@ -17,6 +18,7 @@
   <script src="js/libs/ember-data.js"></script>
   <script src="js/libs/bootstrap.js"></script>
   <script src="js/libs/bootstrap-switch.js"></script>
+  <script src="js/libs/bootstrap-slider.js"></script>
 
   <script src="js/app.js"></script>
   <script src="js/models/option.js"></script>
@@ -175,6 +177,14 @@
 		{{view App.SwitchView id="control-variate-adjusted-strike" disabled=bool_no_control_variate value=bool_adjusted_strike offText="No" onText="Yes"}}
 	      </div>
 	    </div>
+	    {{#if is_monte_carlo}}
+	    <div class="form-group">
+	      <label for="monte-carlo-samples" class="col-sm-2 control-label">MC Samples</label>
+	      <div class="col-sm-4">
+		{{view App.LogSliderView id="monte-carlo-samples" value=model.samples}}
+	      </div>
+	    </div>
+	    {{/if}}
 
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-4">
@@ -335,6 +345,9 @@
 
   <script type="text/x-handlebars" data-template-name="bootstrap-switch">
     {{view Ember.Checkbox class="ember-bootstrap-switch" data-on-text=view.onText data-off-text=view.offText data-on-color=view.onColor data-off-color=view.offColor checked=view.value disabled=view.disabled}}
+  </script>
+  <script type="text/x-handlebars" data-template-name="bootstrap-slider">
+    <input type="text" class="ember-bootstrap-slider" data-slider-min="0" data-slider-max="12" data-slider-step="1" {{bind-attr data-slider-value=view.value}} />
   </script>
 </body>
 </html>

@@ -50,6 +50,10 @@ App.OptionsNewController = Ember.Controller.extend({
 	if(this.get('model.type') && this.get('model.type').search('^asian') >= 0) { return true; }
 	else { return false; }
     }.property('model.type'),
+    is_monte_carlo: function() {
+	if(this.get('model.type').search('_arithmetic$') >= 0) { return true; }
+	else { return false; }
+    }.property('model.type'),
     correlations: function() {
 	var correlations = Ember.A([]);
 
@@ -189,6 +193,8 @@ App.OptionsNewController = Ember.Controller.extend({
 	    console.log(this.get('model.maturity'));
 	    console.log(this.get('model.risk_free_rate'));
 	    console.log(this.get('model.averaging_steps'));
+
+	    console.log(this.get('model.samples'));
 	    
 	    for(var asset = 0; asset < this.get('model.assets.length'); asset++)
 	    {
@@ -343,4 +349,57 @@ App.SwitchView = Ember.View.extend({
 	this.$(this.get('element_selector')).bootstrapSwitch('state', this.get('value'));
 	this.$(this.get('element_selector')).bootstrapSwitch('disabled', this.get('disabled'));
     }.observes('disabled')
+});
+
+App.LogSliderView = Ember.View.extend({
+    templateName: 'bootstrap-slider',
+    element_selector: '.ember-bootstrap-slider',
+    didInsertElement: function() {
+	this.$(this.get('element_selector')).slider({
+	    formater: function(value) {
+		switch(value)
+		{
+		case 0:
+		case 1:
+		case 2:
+		    return Math.pow(10, value).toString();
+		    break;
+		case 3:
+		    return 'One thousand';
+		    break;
+		case 4:
+		    return '10 thousand';
+		    break;
+		case 5:
+		    return '100 thousand';
+		    break;
+		case 6:
+		    return 'One million';
+		    break;
+		case 7:
+		    return '10 million';
+		    break;
+		case 8:
+		    return '100 million';
+		    break;
+		case 9:
+		    return '1 billion';
+		    break;
+		case 10:
+		    return '10 billion';
+		    break;
+		case 11:
+		    return '100 billion';
+		    break;
+		case 12:
+		    return '1 trillion, might take a while...';
+		    break;
+		}
+	    }
+	});
+	var view = this;
+	this.$(this.get('element_selector')).on('slideStop', function(event) {
+	    view.set('value', Math.pow(10, event.value));
+	});
+    },
 });
