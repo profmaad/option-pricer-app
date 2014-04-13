@@ -20,15 +20,16 @@ if(Option.all.size == 0)
                    strike_price: 100.0,
                    maturity: 3.0,
                    risk_free_rate: 5.0,
-                   start_prices: [100],
-                   volatilities: [30],
-                   number_of_assets: 1,
-                   correlations: [],
                    price: 8.23,
                    confidence_interval: [8.22, 8.24],
                    samples: 10000000,
                    completed: true,
                    priced: true,
+                   assets: [{
+                              index: 0,
+                              start_price: 100,
+                              volatility: 30
+                            }],
                  },
                  {
                    type: 'asian_arithmetic',
@@ -37,15 +38,16 @@ if(Option.all.size == 0)
                    maturity: 3.0,
                    risk_free_rate: 5.0,
                    averaging_steps: 50,
-                   start_prices: [100],
-                   volatilities: [30],
-                   number_of_assets: 1,
-                   correlations: [],
                    price: 14.547,
                    confidence_interval: [14.5, 14.6],
                    samples: 10000000,
                    completed: true,
                    priced: true,
+                   assets: [{
+                              index: 0,
+                              start_price: 100,
+                              volatility: 30
+                            }],
                  },
                  {
                    type: 'basket_arithmetic',
@@ -53,15 +55,29 @@ if(Option.all.size == 0)
                    strike_price: 100.0,
                    maturity: 3.0,
                    risk_free_rate: 5.0,
-                   start_prices: [100, 90, 110],
-                   volatilities: [30, 15, 10],
-                   number_of_assets: 3,
                    correlations: [[1.0, 0.8, 0.5], [0.8, 1, 0.3], [0.5, 0.3, 1]],
                    price: 23.4242,
                    confidence_interval: [23.4, 23.44],
                    samples: 10000000,
                    completed: true,
                    priced: true,
+                   assets: [
+                            {
+                              index: 0,
+                              start_price: 100,
+                              volatility: 30,
+                            },
+                            {
+                              index: 1,
+                              start_price: 90,
+                              volatility: 15,
+                            },
+                            {
+                              index: 2,
+                              start_price: 110,
+                              volatility: 10,
+                            },
+                           ],                            
                  },
                 ])
 end
@@ -77,34 +93,52 @@ get '/api/options', :provides => :json do
     options = Option.desc(:timestamp)
   end
 
-  return {options: options}.to_json
+  options_json = []
+  assets_json = []
+
+  options.each do |option|
+    option_json, sub_assets_json = option.to_ember_json
+    options_json << option_json
+    assets_json += sub_assets_json
+  end
+
+  pp options_json
+  pp assets_json
+
+  puts JSON.pretty_generate({options: options_json, assets: assets_json})
+
+  return {options: options_json, assets: assets_json}.to_json
 end
 get '/api/options/:id', :provides => :json do
   content_type :json
 
   option = Option.where(_id: params[:id]).first
 
-  status 404
-  return {option: option}.to_json
+  if(option)
+    option_json, assets_json = option.to_ember_json
+    return {option: option_json, assets: assets_json}.to_json
+  else
+    status 404
+    return {}.to_json
+  end
 end
 
 put '/api/options/:id', :provides => :json do
   content_type :json
 
-  pp params
+  json = JSON.parse(request.body.read)
+  puts json
+
+  return {success: true}.to_json
 end
 
 post '/api/options', :provides => :json do
   content_type :json
 
   json = JSON.parse(request.body.read)
+  puts json
 
-  option = json['option']
-  option['timestamp'] = Time.at(option['timestamp'].to_i/1000)
-
-  new_option = Option.create(option)
-
-  return {success: true, option: {_id: new_option._id}}.to_json
+  return {success: true}.to_json
 end
 
 delete '/api/options/:id', :provides => :json do
