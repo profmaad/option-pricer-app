@@ -1,4 +1,9 @@
 /* Put your CSS here */
-.ember-application {
+.ember-application
+{
     margin: 20px;
+}
+.bootstrap-switch
+{
+    min-width: 50%;
 }

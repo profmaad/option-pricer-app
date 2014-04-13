@@ -111,19 +111,9 @@ App.OptionsNewController = Ember.Controller.extend({
 	}
     }.property('model.assets.@each.volatility'),
     bool_direction: function(key, value) {
-	console.log('BOOL_DIRECTION');
-	console.log(key);
-	console.log(value);
 	if(value === undefined)
 	{	
-	    if(this.get('model.direction') == 'call')
-	    {
-		return false;
-	    }
-	    else
-	    {
-		return true;
-	    }
+	    return (this.get('model.direction') != 'call');
 	}
 	else
 	{
@@ -137,6 +127,47 @@ App.OptionsNewController = Ember.Controller.extend({
 	    }
 	}
     }.property('model.direction'),
+    bool_control_variate: function(key, value) {
+	if(value === undefined)
+	{	
+	    return (this.get('model.control_variate') != 'none');
+	}
+	else
+	{
+	    if(value == true)
+	    {
+		if(this.get('bool_adjusted_strike')) { this.set('model.control_variate', 'geometric_adjusted_strike'); }
+		else { this.set('model.control_variate', 'geometric'); }
+	    }
+	    else
+	    {
+		this.set('model.control_variate', 'none');
+	    }
+	}
+	return (this.get('model.control_variate') != 'none');
+    }.property('model.control_variate', 'bool_adjusted_strike'),
+    bool_no_control_variate: function(key, value) {
+	return (this.get('model.control_variate') == 'none');
+    }.property('model.control_variate'),
+    bool_adjusted_strike: function(key, value) {
+	if(value === undefined)
+	{
+	    return (this.get('model.control_variate').search('_adjusted_strike$') > 0);
+	}
+	else
+	{
+	    if(value == true && this.get('bool_control_variate'))
+	    {
+		this.set('model.control_variate', 'geometric_adjusted_strike');
+	    }
+	    else
+	    {
+		if(this.get('bool_control_variate')) { this.set('model.control_variate', 'geometric'); }
+		else { this.set('model.control_variate', 'none'); }
+	    }
+	}
+	return (this.get('model.control_variate').search('_adjusted_strike$') > 0);
+    }.property('model.control_variate', 'bool_control_variate'),
     actions: {
 	add_asset: function() {
 	    this.get('model.assets').pushObject(this.store.createRecord('asset', {
@@ -214,11 +245,9 @@ App.OptionController = Ember.ObjectController.extend({
 	var correlations = Ember.A([]);
 
 	var number_of_assets = this.get('model.assets.length');
-	console.log(number_of_assets);
 	for(var asset = 0; asset < number_of_assets; asset++)
 	{
 	    var raw_correlations_row = this.get('model.correlations')[asset];
-	    console.log(raw_correlations_row);
 	    var correlations_row = Ember.A([]);
 	    if(!(raw_correlations_row === undefined))
 	    {
@@ -232,7 +261,6 @@ App.OptionController = Ember.ObjectController.extend({
 	    	    });
 	    	}
 	    }
-	    console.log(correlations_row);
 
 	    correlations.pushObject({row_index: asset+1, row: correlations_row, column_class: 'col-sm-'+(asset+2).toString()});
 	}
@@ -307,8 +335,12 @@ App.SwitchView = Ember.View.extend({
 	    view.set('value', state);
 	});
     },
-    toggleState: function () {
+    toggleState: function() {
 	this.$(this.get('element_selector')).bootstrapSwitch('toggleState');
 	return this;
-    },    
+    },
+    disabledChanged: function() {
+	this.$(this.get('element_selector')).bootstrapSwitch('state', this.get('value'));
+	this.$(this.get('element_selector')).bootstrapSwitch('disabled', this.get('disabled'));
+    }.observes('disabled')
 });
