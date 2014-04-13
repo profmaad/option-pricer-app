@@ -17,6 +17,13 @@ App.ArrayTransform = DS.Transform.extend({
     },
 });
 
+App.OptionsNewRoute = Ember.Route.extend({
+    model: function() {
+	new_model = this.store.createRecord('option', {});
+	new_model.get('assets').pushObject(this.store.createRecord('asset', {index:0}));
+	return new_model;
+    }
+});
 App.OptionsNewController = Ember.Controller.extend({
     option_types: [
 	{name: 'European', code: 'european'},
@@ -26,51 +33,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
     ],
     is_basket: function() {
-	if(this.get('type') && this.get('type').search('^basket') >= 0) { return true; }
-	else { return false; }
-    }.property('type'),
-
-    actions: {
-	create_option: function () {
-	    var type = this.get('type');
-	    var number_of_assets = parseInt(this.get('number_of_assets'));
-
-	    var option = this.store.createRecord('option', {
-		id: Date.now().toString(),
-		type: type,
-		number_of_assets: number_of_assets,
-		timestamp: Date.now().toString(),
-		option_id: Date.now().toString(),
-		strike_price: 0,
-		maturity: 0,
-		risk_free_rate: 0,
-		start_price: 0,
-		start_prices: [],
-		volatility: 0,
-		volatilities: [],
-		correlations: [],
-		price: 0,
-		confidence_interval: [0,0],
-		samples: 0,
-		completed: false,
-		priced: false,
-	    });
-
-	    this.store.push('option', option);
-	    this.transitionToRoute('options.edit', option.id);
-	},
-    },
-});
-App.OptionsEditController = Ember.Controller.extend({
-    option_types: [
-	{name: 'European', code: 'european'},
-	{name: 'Geometric Asian', code: 'asian_geometric'},
-	{name: 'Arithmetic Asian', code: 'asian_arithmetic'},
-	{name: 'Geometric Basket', code: 'basket_geometric'},
-	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
-    ],
-    is_basket: function() {
-	if(this.get('model.type') && this.get('model.type').search('^basket') >= 0) { return true; }
+	if(this.get('model.type') && this.get('model.type').search('^basket') >= 0) { this.get('model.assets').pushObject(this.store.createRecord('asset', {index:0})); return true; }
 	else { return false; }
     }.property('model.type'),
     is_asian: function() {
@@ -103,6 +66,52 @@ App.OptionsEditController = Ember.Controller.extend({
 
 	return correlations;
     }.property('model.assets'),
+    start_price: function(key, value) {
+	if(value === undefined)
+	{	
+	    if(this.get('model.assets.length') > 0)
+	    {
+		return this.get('model.assets').objectAt(0).get('start_price');
+	    }
+	    else
+	    {
+	    return undefined;
+	    }
+	}
+	else
+	{
+	    this.get('model.assets').objectAt(0).set('start_price', value);
+	}
+    }.property('model.assets.@each.start_price'),
+    volatility: function(key, value) {
+	if(value === undefined)
+	{	
+	    if(this.get('model.assets.length') > 0)
+	    {
+		return this.get('model.assets').objectAt(0).get('volatility');
+	    }
+	    else
+	    {
+	    return undefined;
+	    }
+	}
+	else
+	{
+	    this.get('model.assets').objectAt(0).set('volatility', value);
+	}
+    }.property('model.assets.@each.volatility'),
+    actions: {
+	create_option: function() {
+	    console.log(this.get('model.risk_free_rate'));
+	    console.log(this.get('model.assets').objectAt(0).get('start_price'));
+	    console.log(this.get('model.assets').objectAt(0).get('volatility'));
+	    if(this.get('model.assets.length') > 1)
+	    {
+		console.log(this.get('model.assets').objectAt(1).get('start_price'));
+		console.log(this.get('model.assets').objectAt(1).get('volatility'));
+	    }
+	}
+    },
 });
 
 App.OptionController = Ember.ObjectController.extend({
@@ -201,8 +210,6 @@ App.OptionController = Ember.ObjectController.extend({
 App.Router.map(function() {
     this.resource('options', {path: '/'}, function() {
 	this.route('new');
-	this.route('edit', {path: '/edit/:option_id'});
-	this.route('price');
     });
 });
 
@@ -218,6 +225,10 @@ Ember.Handlebars.helper('interval_size', function(interval, options) {
 
 Ember.Handlebars.helper('percentage', function(value, options) {
     return +(value*100).toFixed(5);
+});
+
+Ember.Handlebars.helper('index1', function(value, options) {
+    return +(value+1).toString();
 });
 
 Ember.Handlebars.helper('unit', function(unit, options) {

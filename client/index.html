@@ -40,18 +40,24 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars" id="options/edit">
+  <script type="text/x-handlebars" id="options/new">
     <div class="panel panel-default">
-      <div class="panel-heading">Edit Option</div>
+      <div class="panel-heading">New Option</div>
       <div class="panel-body">
 	<form class="form-horizontal">
 	  <fieldset>
 	    <legend>Option Parameters</legend>
 	    <div class="form-group">
+	      <label for="option-type" class="col-sm-2 control-label">Type</label>
+	      <div class="col-sm-4">
+		{{view Ember.Select class="form-control" id="option-type" content=option_types optionValuePath="content.code" optionLabelPath="content.name" value=model.type}}
+	      </div>
+	    </div>
+	    <div class="form-group">
 	      <label for="strike-price" class="col-sm-2 control-label">Strike Price</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="strike-price" class="form-control" value=strike_price}}
+		  {{input type="number" id="strike-price" class="form-control" value=model.strike_price}}
 		  <span class="input-group-addon">HKD</span>
 		</div>
 	      </div>
@@ -60,7 +66,7 @@
 	      <label for="maturity" class="col-sm-2 control-label">Maturity</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="maturity" class="form-control" value=maturity}} 
+		  {{input type="number" id="maturity" class="form-control" value=model.maturity}} 
 		  <span class="input-group-addon">years</span>
 		</div>
 	      </div>
@@ -69,7 +75,7 @@
 	      <label for="risk-free-rate" class="col-sm-2 control-label">Risk-free rate</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="risk-free-rate" class="form-control" value=risk_free_rate}} 
+		  {{input type="number" id="risk-free-rate" class="form-control" value=model.risk_free_rate}} 
 		  <span class="input-group-addon">%</span>
 		</div>
 	      </div>
@@ -78,7 +84,7 @@
 	    <div class="form-group">
 	      <label for="averaging-steps" class="col-sm-2 control-label">Averaging steps</label>
 	      <div class="col-sm-4">
-		{{input type="number" id="averaging-steps" class="form-control" value=averaging_steps}} 
+		{{input type="number" id="averaging-steps" class="form-control" value=model.averaging_steps}} 
 	      </div>
 	    </div>
 	    {{/if}}
@@ -96,31 +102,31 @@
 	      </thead>
 	      
 	      <tbody>
-		{{#each asset in assets}}
+		{{#each asset in model.assets}}
 		<tr>
-		  <th>#{{asset.index}}</th>
+		  <th>#{{index1 asset.index}}</th>
 		  <td>
 		    <div class="input-group">
-		      {{input type="number" id=asset.start_price_field class="form-control" value="start_prices[]"}}
+		      {{input type="number" class="form-control" value=asset.start_price}}
 		      <span class="input-group-addon">HKD</span>
 		    </div>
 		  </td>
 		  <td>
 		    <div class="input-group">
-		      {{input type="number" id=asset.volatility_field class="form-control" value="volatilities[]"}}
+		      {{input type="number" class="form-control" value=asset.volatility}}
 		      <span class="input-group-addon">%</span>
 		    </div>
 		  </td>
 		</tr>
 		{{/each}}
 	      </tbody>
-	    </table>	    
+	    </table>
 	    {{else}}
 	    <div class="form-group">
 	      <label for="start-price" class="col-sm-2 control-label">Start Price</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="start-price" class="form-control" value="start_prices[]"}}
+		  {{input type="number" id="start-price" class="form-control" value=start_price}}
 		  <span class="input-group-addon">HKD</span>
 		</div>
 	      </div>
@@ -129,42 +135,12 @@
 	      <label for="volatility" class="col-sm-2 control-label">Volatility</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="volatility" class="form-control" value="volatilities[]"}}
+		  {{input type="number" id="volatility" class="form-control" value=volatility}}
 		  <span class="input-group-addon">%</span>
 		</div>
 	      </div>
 	    </div>
 	    {{/if}}
-
-	  <div class="form-group">
-	    <div class="col-sm-offset-2 col-sm-4">
-	      <button {{action save_option}} type="submit" class="btn btn-default">Save</button>
-	    </div>
-	  </div>
-	</form>
-      </div>
-    </div>
-  </script>
-  <script type="text/x-handlebars" id="options/new">
-    <div class="panel panel-default">
-      <div class="panel-heading">New Option</div>
-      <div class="panel-body">
-	<form class="form-horizontal">
-	  <div class="form-group">
-	    <label for="option-type" class="col-sm-2 control-label">Type</label>
-	    <div class="col-sm-4">
-	      {{view Ember.Select class="form-control" id="option-type" content=option_types optionValuePath="content.code" optionLabelPath="content.name" value=type}}
-	    </div>
-	  </div>
-
-	  {{#if is_basket}}
-	  <div class="form-group">
-	    <label for="number-of-assets" class="col-sm-2 control-label">Assets</label>
-	    <div class="col-sm-4">
-	      {{input type="number" id="number-of-assets" class="form-control" value=number_of_assets}} 
-	    </div>
-	  </div>
-	  {{/if}}
 
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-4">
