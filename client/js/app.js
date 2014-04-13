@@ -2,9 +2,6 @@ App = Ember.Application.create({LOG_TRANSITIONS: true, LOG_TRANSITIONS_INTERNAL:
 App.ApplicationAdapter = DS.RESTAdapter.extend({
     namespace: 'api',
 });
-App.ApplicationSerializer = DS.RESTSerializer.extend({
-  primaryKey: "_id"
-});
 
 App.ApplicationController = Ember.Controller.extend({
     title: 'OpenCL Option Pricer',
@@ -80,67 +77,32 @@ App.OptionsEditController = Ember.Controller.extend({
 	if(this.get('model.type') && this.get('model.type').search('^asian') >= 0) { return true; }
 	else { return false; }
     }.property('model.type'),
-    assets: function() {
-	if(this.get('is_basket'))
-	{
-	    var assets = [];
+    correlations: function() {
+	var correlations = Ember.A([]);
 
-	    for(var asset = 0; asset < this.get('model.number_of_assets'); asset++)
+	for(var asset = 0; asset < this.get('model.assets').length; asset++)
+	{
+	    var raw_correlations_row = this.get('model.correlations')[asset];
+	    var correlations_row = Ember.A([]);
+	    if(!(raw_correlations_row === undefined))
 	    {
-		var raw_correlations = this.get('model.correlations')[asset];
-		var correlations = new Array(this.get('model.number_of_assets'));
-		if(!(raw_correlations === undefined))
+		for(var c = 0; c < raw_correlations_row.length; c++)
 		{
-		    for(var c = 0; c < raw_correlations.length; c++)
-		    {
-			correlations.push({
-			    value: raw_correlations[c] * 100,
-			    text_muted: (c <= asset),
-			});
-		    }
+		    correlations_row.pushObject({
+			row_index: asset+1,
+			column_index: c+1,
+			value: raw_correlations[c] * 100,
+			text_muted: (c <= asset),
+		    });
 		}
-		
-		assets.push({
-		    index: asset+1,
-		    correlations_column: 'col-sm-'+(asset+2).toString(),
-		    start_price: this.get('model.start_prices')[asset],
-		    volatility: this.get('model.volatilities')[asset],
-		    correlations: correlations,
-		    start_price_field: 'start_prices_' + asset.toString(),
-		    volatility_field: 'volatilities_' + asset.toString(),
-		});
 	    }
+	    console.log(correlations_row);
 
-	    return assets;
+	    correlations.pushObject({row_index: asset+1, row: correlations_row, column_class: 'col-sm-'+(asset+2).toString()});
 	}
-	else
-	{
-	    return [{
-		index: 1,
-		correlations_column: 'col-sm-2',
-		start_price: this.get('start_price'),
-		volatility: this.get('volatility')
-	    }];
-	}
-    }.property(),
 
-    actions: {
-	save_option: function () {
-	    console.log(this.get('start_prices[]'));
-	    console.log(this.get('volatilities[]'));
-
-	    var start_prices = new Array(this.get('model.number_of_assets'));
-	    var volatilities = new Array(this.get('model.number_of_assets'));
-	    for(var asset = 0; asset < this.get('model.number_of_assets'); asset++)
-	    {
-		start_prices[asset] = this.get('start_prices_' + asset.toString());
-		volatilities[asset] = this.get('volatilities_' + asset.toString());
-	    }
-
-	    console.log(start_prices);
-	    console.log(volatilities);
-	},
-    },
+	return correlations;
+    }.property('model.assets'),
 });
 
 App.OptionController = Ember.ObjectController.extend({
@@ -169,73 +131,71 @@ App.OptionController = Ember.ObjectController.extend({
 	    return 'Arithmetic Basket';
 	    break;
 	}
-    }.property(),
+    }.property('type'),
     is_asian: function() {
 	if(this.get('type').search('^asian') >= 0) { return true; }
 	else { return false; }
-    }.property(),
+    }.property('type'),
     is_basket: function() {
 	if(this.get('type').search('^basket') >= 0) { return true; }
 	else { return false; }
-    }.property(),
+    }.property('type'),
     is_monte_carlo: function() {
 	if(this.get('type').search('_arithmetic$') >= 0) { return true; }
 	else { return false; }
-    }.property(),
+    }.property('type'),
     number_of_assets: function() {
-    	if(this.get('is_basket'))
-    	{
-    	    return Math.min.apply(null, [this.get('start_prices').length, this.get('volatilities').length, this.get('correlations').length]);
-    	}
-    	else
-    	{
-    	    return 1;
-    	}
-    }.property(),
-    assets: function() {
-	if(this.get('is_basket'))
+	return this.get('assets').length;
+    }.property('type'),
+    correlations: function() {
+	var correlations = Ember.A([]);
+
+	var number_of_assets = this.get('model.assets.length');
+	console.log(number_of_assets);
+	for(var asset = 0; asset < number_of_assets; asset++)
 	{
-	    var assets = [];
-
-	    for(var asset = 0; asset < this.get('number_of_assets'); asset++)
+	    var raw_correlations_row = this.get('model.correlations')[asset];
+	    console.log(raw_correlations_row);
+	    var correlations_row = Ember.A([]);
+	    if(!(raw_correlations_row === undefined))
 	    {
-		var raw_correlations = this.get('correlations')[asset];
-		var correlations = [];
-		for(var c = 0; c < raw_correlations.length; c++)
-		{
-		    correlations.push({
-			value: raw_correlations[c] * 100,
-			text_muted: (c <= asset),
-		    });
-		}
-		
-		assets.push({
-		    index: asset+1,
-		    correlations_column: 'col-sm-'+(asset+2).toString(),
-		    start_price: this.get('start_prices')[asset],
-		    volatility: this.get('volatilities')[asset],
-		    correlations: correlations,
-		});
+	    	for(var c = 0; c < raw_correlations_row.length; c++)
+	    	{
+	    	    correlations_row.pushObject({
+	    		row_index: asset+1,
+	    		column_index: c+1,
+	    		value: raw_correlations_row[c] * 100,
+	    		text_muted: (c <= asset),
+	    	    });
+	    	}
 	    }
+	    console.log(correlations_row);
 
-	    return assets;
+	    correlations.pushObject({row_index: asset+1, row: correlations_row, column_class: 'col-sm-'+(asset+2).toString()});
+	}
+
+	return correlations;
+    }.property('assets'),
+    start_price: function() {
+	if(this.get('model.assets.length') > 0)
+	{
+	    return this.get('model.assets').objectAt(0).get('start_price');
 	}
 	else
 	{
-	    return [{
-		index: 1,
-		correlations_column: 'col-sm-2',
-		start_price: this.get('start_price'),
-		volatility: this.get('volatility')
-	    }];
+	    return 0;
 	}
-    }.property(),
-    start_price: function() {
-	return this.get('start_prices')[0];
-    }.property('model.start_prices'),
+    }.property('model.assets.@each.start_price'),
     volatility: function() {
-	return this.get('volatilities')[0];
-    }.property('model.volatilities'),
+	if(this.get('model.assets.length') > 0)
+	{
+	    return this.get('model.assets').objectAt(0).get('volatility');
+	}
+	else
+	{
+	    return 0;
+	}
+    }.property('model.assets.@each.volatility'),
 });
 
 App.Router.map(function() {
@@ -250,11 +210,6 @@ App.OptionsRoute = Ember.Route.extend({
     model: function() {
 	return this.store.find('option', {completed: true});
     }
-});
-
-Ember.Handlebars.helper('log', function(value, options) {
-    console.log(value);
-    return '';
 });
 
 Ember.Handlebars.helper('interval_size', function(interval, options) {

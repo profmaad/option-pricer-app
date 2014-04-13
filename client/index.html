@@ -187,6 +187,7 @@
       
       <div class="panel-group" id="accordion">
 	{{#each option in model itemController="option"}}
+	{{log option.assets}}
 	<div class="panel panel-default">
 	  <div class="panel-heading">
 	    <h4 class="panel-title">
@@ -256,17 +257,17 @@
 		    <thead>
 		      <tr>
 			<th class="col-sm-1"></th>
-			{{#each asset in option.assets}}
-			<th {{bind-attr class=asset.correlations_column}}>#{{asset.index}}</th>
+			{{#each correlation_row in option.correlations}}
+			<th {{bind-attr class=correlation_row.column_class}}>#{{correlation_row.row_index}}</th>
 			{{/each}}
 		      </tr>
 		    </thead>
 		    
 		    <tbody>
-		      {{#each asset in option.assets}}
+		      {{#each correlation_row in option.correlations}}
 		      <tr>
-			<th>#{{asset.index}}</th>
-			{{#each correlation in asset.correlations}}
+			<th>#{{correlation_row.row_index}}</th>
+			{{#each correlation in correlation_row.row}}
 			<td {{bind-attr class="correlation.text_muted"}}>{{correlation.value}} %</td>
 			{{/each}}
 		      </tr>
