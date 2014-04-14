@@ -123,27 +123,51 @@ get '/api/options/:id', :provides => :json do
   end
 end
 
-put '/api/options/:id', :provides => :json do
-  content_type :json
-
-  json = JSON.parse(request.body.read)
-  puts json
-
-  return {success: true}.to_json
-end
-
 post '/api/options', :provides => :json do
   content_type :json
 
   json = JSON.parse(request.body.read)
-  puts json
+  json = json['option']
 
-  return {success: true}.to_json
+  new_assets = json['assets'].map do |asset|
+    {
+      index: asset['index'],
+      start_price: asset['start_price'],
+      volatility: asset['volatility'],
+    }
+  end
+  pp new_assets
+
+  new_correlations = json['correlations'].map do |row|
+    row.map do |value|
+      value['value']
+    end
+  end
+  pp new_correlations
+
+  new_option = Option.create({
+                               type: json['type'],
+                               direction: json['direction'],
+                               control_variate: json['control_variate'],
+                               timestamp: Time.now,
+                               priced: false,
+                               strike_price: json['strike_price'],
+                               maturity: json['maturity'],
+                               risk_free_rate: json['risk_free_rate'],
+                               correlations: new_correlations,
+                               samples: json['samples'],
+                               assets: new_assets,
+                             })
+  pp new_option
+
+  option_json, assets_json = new_option.to_ember_json
+  val = {option: option_json, assets: assets_json}
+  pp val
+  return {}.to_json
 end
 
 delete '/api/options/:id', :provides => :json do
   content_type :json
-
 
   Option.find(params[:id]).delete
 end

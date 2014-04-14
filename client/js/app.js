@@ -87,6 +87,8 @@ App.OptionsNewController = Ember.Controller.extend({
 	for(var asset = 0; asset < number_of_assets; asset++)
 	{
 	    var raw_correlations_row = (raw_correlations === undefined ? Ember.A([]) : raw_correlations.objectAt(asset));
+	    console.log('ASSET INDEX: ' + asset);
+	    console.log('RAW CORR ROW: ' + raw_correlations_row);
 	    var correlations_row = Ember.A([]);
 
 	    for(var c = 0; c < number_of_assets; c++)
@@ -270,9 +272,22 @@ App.OptionsNewController = Ember.Controller.extend({
 		var row = this.get('model.correlations').objectAt(asset);
 		for(var column = 0; column < row.get('length'); column++)
 		{
-		    console.log('Correlations ('+(asset+1)+', '+(column+1)+'): ' + row.objectAt(column).value);
+		    console.log('Correlations ('+(asset+1)+', '+(column+1)+'): ' + (row.objectAt(column).value ? row.objectAt(column).value: row.objectAt(column)));
 		}
 	    }
+
+	    var self = this;
+	    
+	    function transitionToIndex(option) {
+		self.get('model').reload();
+		self.transitionToRoute('options.index');
+	    }
+	    
+	    function failure(reason) {
+		console.log('[ERROR]: ' + reason);
+	    }
+	    
+	    this.get('model').save().then(transitionToIndex).catch(failure);
 	}
     },
 });
@@ -334,7 +349,7 @@ App.OptionController = Ember.ObjectController.extend({
 	    	    correlations_row.pushObject({
 	    		row_index: asset+1,
 	    		column_index: c+1,
-	    		value: raw_correlations_row[c] * 100,
+	    		value: raw_correlations_row[c],
 	    		text_muted: (c <= asset),
 	    	    });
 	    	}
@@ -375,7 +390,8 @@ App.Router.map(function() {
 
 App.OptionsRoute = Ember.Route.extend({
     model: function() {
-	return this.store.find('option', {completed: true});
+	//return this.store.find('option', {completed: true});
+	return this.store.find('option');
     }
 });
 
@@ -495,4 +511,25 @@ App.LogSliderView = Ember.View.extend({
 	    view.set('value', Math.pow(10, event.value));
 	});
     },
+});
+
+DS.JSONSerializer.reopen({ // or DS.RESTSerializer
+    serializeHasMany: function(record, json, relationship) {
+        var key = relationship.key,
+        hasManyRecords = Ember.get(record, key);
+        
+        // Embed hasMany relationship if records exist
+        if (hasManyRecords && relationship.options.embedded == 'always')
+	{
+            json[key] = [];
+            hasManyRecords.forEach(function(item, index) {
+		json[key].push(item.serialize());
+	    });
+        }
+        // Fallback to default serialization behavior
+        else
+	{
+            return this._super(record, json, relationship);
+        }
+    }
 });

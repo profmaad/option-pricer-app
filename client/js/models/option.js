@@ -11,14 +11,13 @@ App.Option = DS.Model.extend({
     maturity: DS.attr('number'),
     risk_free_rate: DS.attr('number'),
 
-    assets: DS.hasMany('asset'),
+    assets: DS.hasMany('asset', {embedded: 'always'}),
     correlations: DS.attr('array'),
     
     price: DS.attr('number'),
     confidence_interval: DS.attr('array'),
     samples: DS.attr('number', {defaultValue: 6}),
 
-    completed: DS.attr('boolean'),
     priced: DS.attr('boolean'),
 });
 

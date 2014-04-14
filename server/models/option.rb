@@ -9,7 +9,6 @@ class Option
 
   field :timestamp, type: DateTime
 
-  field :completed, type: Boolean
   field :priced, type: Boolean
 
   field :strike_price, type: Float
@@ -34,7 +33,6 @@ class Option
 
     option_json['timestamp'] = self.timestamp.to_s
 
-    option_json['completed'] = self.completed
     option_json['priced'] = self.priced
 
     option_json['strike_price'] = self.strike_price
@@ -59,7 +57,6 @@ class Asset
   include Mongoid::Document
 
   embedded_in :option
-  
   field :index, type: Integer
 
   field :start_price, type: Float
@@ -69,6 +66,7 @@ class Asset
     asset_json = {}
     
     asset_json['id'] = self.option._id.to_s + self.index.to_s
+    asset_json['index'] = self.index
 
     asset_json['start_price'] = self.start_price
     asset_json['volatility'] = self.volatility

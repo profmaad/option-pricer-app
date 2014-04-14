@@ -206,6 +206,7 @@
 		{{view App.SwitchView id="option-direction" value=bool_direction offText="Call" onText="Put" onColor="warning" offColor="success"}}
 	      </div>
 	    </div>
+	    {{#if is_monte_carlo}}
 	    <div class="form-group">
 	      <label for="control-variate-geometric" class="col-sm-2 control-label">Control Variate</label>
 	      <div class="col-sm-4">
@@ -218,7 +219,6 @@
 		{{view App.SwitchView id="control-variate-adjusted-strike" disabled=bool_no_control_variate value=bool_adjusted_strike offText="No" onText="Yes"}}
 	      </div>
 	    </div>
-	    {{#if is_monte_carlo}}
 	    <div class="form-group">
 	      <label for="monte-carlo-samples" class="col-sm-2 control-label">MC Samples</label>
 	      <div class="col-sm-4">
