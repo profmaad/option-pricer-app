@@ -43,7 +43,16 @@ class Option
     option_json['confidence_interval'] = self.confidence_interval
     option_json['samples'] = self.samples
 
-    option_json['correlations'] = self.correlations
+    if(self.correlations)
+      correlations_json = self.correlations.map do |row|
+        row.map do |value|
+          {value: value}
+        end
+      end
+    else
+      correlations_json = self.correlations
+    end
+    option_json['correlations'] = correlations_json
 
     assets_json = self.assets.map {|asset| asset.to_ember_json}
 

@@ -163,7 +163,7 @@ post '/api/options', :provides => :json do
   option_json, assets_json = new_option.to_ember_json
   val = {option: option_json, assets: assets_json}
   pp val
-  return {}.to_json
+  return val.to_json
 end
 
 delete '/api/options/:id', :provides => :json do
