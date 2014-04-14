@@ -61,7 +61,7 @@
 	      <label for="strike-price" class="col-sm-2 control-label">Strike Price</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="strike-price" class="form-control" value=model.strike_price}}
+		  {{input type="number" id="strike-price" class="form-control" min="0" value=model.strike_price}}
 		  <span class="input-group-addon">HKD</span>
 		</div>
 	      </div>
@@ -70,7 +70,7 @@
 	      <label for="maturity" class="col-sm-2 control-label">Maturity</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="maturity" class="form-control" value=model.maturity}} 
+		  {{input type="number" id="maturity" class="form-control" min="0" value=model.maturity}} 
 		  <span class="input-group-addon">years</span>
 		</div>
 	      </div>
@@ -79,7 +79,7 @@
 	      <label for="risk-free-rate" class="col-sm-2 control-label">Risk-free rate</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="risk-free-rate" class="form-control" value=model.risk_free_rate}} 
+		  {{input type="number" id="risk-free-rate" class="form-control" min="0" value=model.risk_free_rate}} 
 		  <span class="input-group-addon">%</span>
 		</div>
 	      </div>
@@ -88,7 +88,7 @@
 	    <div class="form-group">
 	      <label for="averaging-steps" class="col-sm-2 control-label">Averaging steps</label>
 	      <div class="col-sm-4">
-		{{input type="number" id="averaging-steps" class="form-control" value=model.averaging_steps}} 
+		{{input type="number" id="averaging-steps" class="form-control" min="1" value=model.averaging_steps}} 
 	      </div>
 	    </div>
 	    {{/if}}
@@ -121,13 +121,13 @@
 		  </th>
 		  <td>
 		    <div class="input-group">
-		      {{input type="number" class="form-control" value=asset.start_price}}
+		      {{input type="number" class="form-control" min="0" value=asset.start_price}}
 		      <span class="input-group-addon">HKD</span>
 		    </div>
 		  </td>
 		  <td>
 		    <div class="input-group">
-		      {{input type="number" class="form-control" value=asset.volatility}}
+		      {{input type="number" class="form-control" min="0" value=asset.volatility}}
 		      <span class="input-group-addon">%</span>
 		    </div>
 		  </td>
@@ -140,7 +140,7 @@
 	      <label for="start-price" class="col-sm-2 control-label">Start Price</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="start-price" class="form-control" value=start_price}}
+		  {{input type="number" class="form-control" min="0" value=start_price}}
 		  <span class="input-group-addon">HKD</span>
 		</div>
 	      </div>
@@ -149,13 +149,54 @@
 	      <label for="volatility" class="col-sm-2 control-label">Volatility</label>
 	      <div class="col-sm-4">
 		<div class="input-group">
-		  {{input type="number" id="volatility" class="form-control" value=volatility}}
+		  {{input type="number" id="volatility" class="form-control" min="0" value=volatility}}
 		  <span class="input-group-addon">%</span>
 		</div>
 	      </div>
 	    </div>
 	    {{/if}}
 	  </fieldset>
+
+	  {{#if is_basket}}
+	  <fieldset>
+	    <legend>
+	      Asset Correlations
+	    </legend>
+
+	    <table class="table">
+	      <thead>
+		<tr>
+		  <th class="col-sm-1"></th>
+		  {{#each header in correlations_header}}
+		  <th {{bind-attr class=header.column_class}}>#{{header.index}}</th>
+		  {{/each}}
+		</tr>
+	      </thead>
+	      
+	      <tbody>
+		{{#each correlation_row in correlations}}
+		<tr>
+		  <th>#{{correlation_row.row_index}}</th>
+		  {{#each correlation in correlation_row.row}}
+		  <td>
+		    {{#if correlation.is_required}}
+		    <div class="input-group">
+		      {{view App.CorrelationView type="number" class="form-control" min="0" max="100" value=correlation.value parentController=controller row_index=correlation.row_index column_index=correlation.column_index}}
+		      <span class="input-group-addon">%</span>
+		    </div>
+		    {{else}}
+		    {{#if correlation.is_diagonal}}
+		    <span class="text-muted">{{correlation.value}}%</span>
+		    {{/if}}
+		    {{/if}}
+		  </td>
+		  {{/each}}
+		</tr>
+		{{/each}}
+	      </tbody>
+	    </table>
+	  </fieldset>
+	  {{/if}}
 	  
 	  <fieldset>
 	    <legend>Pricing Parameters</legend>

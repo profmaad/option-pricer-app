@@ -21,6 +21,16 @@ App.OptionsNewRoute = Ember.Route.extend({
     model: function() {
 	new_model = this.store.createRecord('option', {});
 	new_model.get('assets').pushObject(this.store.createRecord('asset', {index:0}));
+	
+	correlations_row = Ember.A([]);
+	correlations_row.pushObject({value: 100});
+	correlations = Ember.A([]);
+	correlations.pushObject(correlations_row);
+	console.log(correlations);
+	console.log(correlations.objectAt(0));
+	console.log(correlations.objectAt(0).objectAt(0));
+	new_model.set('correlations', correlations);
+
 	return new_model;
     }
 });
@@ -54,32 +64,73 @@ App.OptionsNewController = Ember.Controller.extend({
 	if(this.get('model.type').search('_arithmetic$') >= 0) { return true; }
 	else { return false; }
     }.property('model.type'),
-    correlations: function() {
-	var correlations = Ember.A([]);
-
-	for(var asset = 0; asset < this.get('model.assets').length; asset++)
+    correlations_header: function() {
+	var correlations_header = Ember.A([]);
+	
+	for(var asset = 0; asset < this.get('model.assets.length'); asset++)
 	{
-	    var raw_correlations_row = this.get('model.correlations')[asset];
+	    correlations_header.pushObject({
+		index: asset+1,
+		column_class: 'col-sm-'+(asset+2).toString()
+	    });
+	}
+
+	return correlations_header;
+    }.property('model.assets.@each'),
+    correlations: function(key, value) {
+	console.log("CORRELATIONS: " + value);
+
+	var raw_correlations = this.get('model.correlations');
+	var correlations = Ember.A([]);
+	var number_of_assets = this.get('model.assets.length');
+
+	for(var asset = 0; asset < number_of_assets; asset++)
+	{
+	    var raw_correlations_row = (raw_correlations === undefined ? Ember.A([]) : raw_correlations.objectAt(asset));
 	    var correlations_row = Ember.A([]);
-	    if(!(raw_correlations_row === undefined))
+
+	    for(var c = 0; c < number_of_assets; c++)
 	    {
-		for(var c = 0; c < raw_correlations_row.length; c++)
-		{
-		    correlations_row.pushObject({
-			row_index: asset+1,
-			column_index: c+1,
-			value: raw_correlations[c] * 100,
-			text_muted: (c <= asset),
-		    });
-		}
+		var value = (raw_correlations_row.length <= c ? 0 : raw_correlations_row.objectAt(c));
+		if(!(value.value === undefined)) { value = value.value; }
+		if(c == asset) { value = 100; }
+
+		correlations_row.pushObject({
+		    row_index: asset+1,
+		    column_index: c+1,
+		    value: value,
+		    is_required: (c > asset),
+		    is_diagonal: (c == asset),
+		});
 	    }
-	    console.log(correlations_row);
 
 	    correlations.pushObject({row_index: asset+1, row: correlations_row, column_class: 'col-sm-'+(asset+2).toString()});
 	}
 
 	return correlations;
-    }.property('model.assets'),
+    }.property('model.assets.@each', 'model.correlations', 'model.correlations.@each'),
+    set_correlation: function(row_index, column_index, value) {
+	var number_of_assets = this.get('model.assets.length');
+	var correlations = this.get('model.correlations');
+	if(!correlations)
+	{
+	    correlations = Ember.A([]);
+	    for(var asset = 0; asset < number_of_assets; asset++)
+	    {
+		var row = Ember.A([]);
+		for(var column = 0; column < number_of_assets; column++)
+		{
+		    row.pushObject({value: (column == asset ? 100 : 0)});
+		}
+
+		correlations.pushObject(row);
+	    }
+	}
+
+	correlations.objectAt(row_index).objectAt(column_index).value = value;
+	correlations.objectAt(column_index).objectAt(row_index).value = value;
+	this.set('model.correlations', correlations);
+    },
     start_price: function(key, value) {
 	if(value === undefined)
 	{	
@@ -177,6 +228,18 @@ App.OptionsNewController = Ember.Controller.extend({
 	    this.get('model.assets').pushObject(this.store.createRecord('asset', {
 		index: this.get('model.assets.length')
 	    })); 
+
+	    for(var asset = 0; asset < this.get('model.assets.length')-1; asset++)
+	    {
+		this.get('model.correlations.'+asset).pushObject({value: 0});
+	    }
+	    var correlation_row = Ember.A([]);
+	    for(var asset = 0; asset < this.get('model.assets.length'); asset++)
+	    {
+		correlation_row.pushObject({value: (asset == this.get('model.assets.length')-1) ? 100 : 0});
+	    }
+	    console.log(correlation_row);
+	    this.get('model.correlations').pushObject(correlation_row);
 	},
 	remove_last_asset: function() {
 	    if(this.get('model.assets.length') > 1)
@@ -200,6 +263,15 @@ App.OptionsNewController = Ember.Controller.extend({
 	    {
 		console.log(this.get('model.assets').objectAt(asset).get('start_price'));
 		console.log(this.get('model.assets').objectAt(asset).get('volatility'));
+	    }
+
+	    for(var asset = 0; asset < this.get('model.correlations.length'); asset++)
+	    {
+		var row = this.get('model.correlations').objectAt(asset);
+		for(var column = 0; column < row.get('length'); column++)
+		{
+		    console.log('Correlations ('+(asset+1)+', '+(column+1)+'): ' + row.objectAt(column).value);
+		}
 	    }
 	}
     },
@@ -322,6 +394,27 @@ Ember.Handlebars.helper('index1', function(value, options) {
 Ember.Handlebars.helper('unit', function(unit, options) {
     var escaped = Handlebars.Utils.escapeExpression(unit);
     return new Handlebars.SafeString('<span class="text-muted">' + escaped + '</span>');
+});
+
+App.CorrelationView = Ember.TextField.extend({
+    parentController: undefined,
+    row_index: 0,
+    column_index: 0,
+    value: 0,
+
+    valueChanged: function() {
+	var value = this.get('value');
+	var row_index = this.get('row_index')-1;
+	var column_index = this.get('column_index')-1;
+	var parent_controller = this.get('parentController');
+	console.log('Value: ' + value);
+	console.log('Row: ' + row_index);
+	console.log('Column: ' + column_index);
+	console.log('Parent Controller: ' + parent_controller);
+
+	parent_controller.set_correlation(row_index, column_index, value);
+	//this.$().focus();
+    }.observes('value')
 });
 
 Ember.Checkbox.reopen({
