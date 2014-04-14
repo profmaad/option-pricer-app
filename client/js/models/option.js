@@ -18,7 +18,8 @@ App.Option = DS.Model.extend({
     confidence_interval: DS.attr('array'),
     samples: DS.attr('number', {defaultValue: 6}),
 
-    priced: DS.attr('boolean'),
+    priced: DS.attr('boolean', {defaultValue: false}),
+    processing: DS.attr('boolean', {defaultValue: false}),
 });
 
 App.Asset = DS.Model.extend({

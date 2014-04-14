@@ -357,6 +357,7 @@
 	      <div class="panel panel-default">
 		<div class="panel-heading">Pricing Results</div>
 		<div class="panel-body">
+		  {{#if option.priced}}
 		  <table class="table">
 		    <tr>
 		      <th class="col-sm-1">Option Price</th>
@@ -373,6 +374,19 @@
 		    </tr>
 		    {{/if}}
 		  </table>
+		  {{else}}
+		  <div class="progress progress-striped active">
+		    <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">		      
+		      <span>
+			{{#if option.processing}}
+			Processing
+			{{else}}
+			Queued
+			{{/if}}
+		      </span>
+		    </div>
+		  </div>
+		  {{/if}}
 		</div>
 	      </div>
 	    </div>

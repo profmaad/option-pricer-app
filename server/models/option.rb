@@ -9,6 +9,7 @@ class Option
 
   field :timestamp, type: DateTime
 
+  field :processing, type: Boolean
   field :priced, type: Boolean
 
   field :strike_price, type: Float
