@@ -287,10 +287,10 @@ App.OptionsNewController = Ember.Controller.extend({
 App.OptionController = Ember.ObjectController.extend({
     panel_href: function() {
 	return '#option' + this.get('id');
-    }.property(),
+    }.property('id'),
     panel_id: function() {
 	return 'option' + this.get('id');
-    }.property(),
+    }.property('id'),
     type_string: function() {
 	switch(this.get('type'))
 	{
@@ -356,32 +356,6 @@ App.OptionController = Ember.ObjectController.extend({
 
 	return correlations;
     }.property('model.assets', 'model.assets.@each', 'model.correlations', 'model.correlations.@each'),
-    // correlations: function() {
-    // 	var correlations = Ember.A([]);
-
-    // 	var number_of_assets = this.get('model.assets.length');
-    // 	for(var asset = 0; asset < number_of_assets; asset++)
-    // 	{
-    // 	    var raw_correlations_row = this.get('model.correlations')[asset];
-    // 	    var correlations_row = Ember.A([]);
-    // 	    if(!(raw_correlations_row === undefined))
-    // 	    {
-    // 	    	for(var c = 0; c < raw_correlations_row.length; c++)
-    // 	    	{
-    // 	    	    correlations_row.pushObject({
-    // 	    		row_index: asset+1,
-    // 	    		column_index: c+1,
-    // 	    		value: raw_correlations_row[c],
-    // 	    		text_muted: (c <= asset),
-    // 	    	    });
-    // 	    	}
-    // 	    }
-
-    // 	    correlations.pushObject({row_index: asset+1, row: correlations_row, column_class: 'col-sm-'+(asset+2).toString()});
-    // 	}
-
-    // 	return correlations;
-    // }.property('assets'),
     start_price: function() {
 	if(this.get('model.assets.length') > 0)
 	{
@@ -402,6 +376,27 @@ App.OptionController = Ember.ObjectController.extend({
 	    return 0;
 	}
     }.property('model.assets.@each.volatility'),
+});
+
+App.OptionsIndexController = Ember.ArrayController.extend({
+    processing_options: function() {
+	console.log('PROCESSING OPTIONS');
+	return this.filter(function(option) {
+	    return option.get('processing');
+	});
+    }.property('@each.processing'),
+    queued_options: function() {
+	console.log('QUEUED OPTIONS');
+	return this.filter(function(option) {
+	    return (!option.get('processing') && !option.get('priced'));
+	});
+    }.property('@each.processing', 'model.@each.priced'),
+    options_history: function() {
+	console.log('OPTIONS HISTORY');
+	return this.filter(function(option) {
+	    return option.get('priced');
+	});
+    }.property('@each.priced'),
 });
 
 App.Router.map(function() {

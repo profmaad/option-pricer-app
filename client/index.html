@@ -237,164 +237,194 @@
     </div>
   </script>
 
+  <script type="text/x-handlebars" data-template-name="_option">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	<h4 class="panel-title">
+	  <a data-toggle="collapse" data-parent="#accordion" {{bind-attr href=option.panel_href}}>
+	    {{option.type_string}} option <small>{{option.timestamp}}</small>
+	  </a>
+	</h4>
+      </div>
+      <div {{bind-attr id=option.panel_id}} class="panel-collapse collapse">
+	<div class="panel-body">
+
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Option Parameters</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<tr>
+		  <th class="col-sm-1">Strike Price</th>
+		  <td class="col-sm-2">{{option.strike_price}} {{unit "HKD"}}</td>
+		</tr>
+		<tr>
+		  <th>Maturity</th>
+		  <td>{{option.maturity}} {{unit "years"}}</td>
+		</tr>
+		<tr>
+		  <th>Risk-free rate</th>
+		  <td>{{option.risk_free_rate}} %</td>
+		</tr>
+		{{#if option.averaging_steps}}
+		<tr>
+		  <th>Averaging steps</th>
+		  <td>{{option.averaging_steps}}</td>
+		</tr>
+		{{/if}}
+	      </table>
+	    </div>
+	  </div>
+
+	  {{#if option.is_basket}}
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Asset Parameters</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<thead>
+		  <tr>
+		    <th class="col-sm-1" />
+		    <th class="col-sm-2">Start Price</th>
+		    <th class="col-sm-3">Volatility</th>
+		</thead>
+		
+		<tbody>
+		  {{#each asset in option.assets}}
+		  <tr>
+		    <th>#{{asset.index}}</th>
+		    <td>{{asset.start_price}} {{unit "HKD"}}</td>
+		    <td>{{asset.volatility}} %</td>
+		  </tr>
+		  {{/each}}
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Asset Correlations</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<thead>
+		  <tr>
+		    <th class="col-sm-1"></th>
+		    {{#each correlation_row in option.correlations}}
+		    <th {{bind-attr class=correlation_row.column_class}}>#{{correlation_row.row_index}}</th>
+		    {{/each}}
+		  </tr>
+		</thead>
+		
+		<tbody>
+		  {{#each correlation_row in option.correlations}}
+		  <tr>
+		    <th>#{{correlation_row.row_index}}</th>
+		    {{#each correlation in correlation_row.row}}
+		    <td {{bind-attr class="correlation.is_required::text-muted"}}>{{correlation.value}} %</td>
+		    {{/each}}
+		  </tr>
+		  {{/each}}
+		</tbody>
+	      </table>
+	    </div>
+	  </div>
+	  {{else}}
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Asset Parameters</div>
+	    <div class="panel-body">
+	      <table class="table">
+		<tr>
+		  <th class="col-sm-1">Start Price</th>
+		  <td class="col-sm-2">{{option.start_price}} {{unit "HKD"}}</td>
+		</tr>
+		<tr>
+		  <th>Volatility</th>
+		  <td>{{option.volatility}} %</td>
+		</tr>
+	      </table>
+	    </div>
+	  </div>
+	  {{/if}}
+
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Pricing Results</div>
+	    <div class="panel-body">
+	      {{#if option.priced}}
+	      <table class="table">
+		<tr>
+		  <th class="col-sm-1">Option Price</th>
+		  <td class="col-sm-2">{{option.price}} {{unit "HKD"}}</td>
+		</tr>
+		<tr>
+		  <th>Confidence Interval</th>
+		  <td>{{option.confidence_interval.[0]}} - {{option.confidence_interval.[1]}} {{unit "HKD"}} ({{interval_size option.confidence_interval}} {{unit "HKD"}})</td>
+		</tr>
+		{{#if option.is_monte_carlo}}
+		<tr>
+		  <th>Monte Carlo samples</th>
+		  <td>{{option.samples}}</td>
+		</tr>
+		{{/if}}
+	      </table>
+	      {{else}}
+	      <div class="progress progress-striped active">
+		<div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">		      
+		  <span>
+		    {{#if option.processing}}
+		    Processing
+		    {{else}}
+		    Queued
+		    {{/if}}
+		  </span>
+		</div>
+	      </div>
+	      {{/if}}
+	    </div>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </script>
+
   <script type="text/x-handlebars" id="options/index">
     <div class="row">
       {{#link-to "options.new" class="btn btn-lg btn-default btn-block" type="button"}}New option{{/link-to}}
       <hr>
     </div>
 
+    {{#if processing_options}}
+    <div class="row">
+      <h3><small>Processing</small></h3>
+
+      <div class="panel-group" id="accordion">
+	{{#each option in processing_options itemController="option"}}
+	{{partial "option"}}
+	{{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if queued_options}}
+    <div class="row">
+      <h3><small>Queued</small></h3>
+      
+      <div class="panel-group" id="accordion">
+	{{#each option in queued_options itemController="option"}}
+	{{partial "option"}}
+	{{/each}}
+      </div>
+    </div>
+    {{/if}}
+
+    {{#if options_history}}
     <div class="row">
       <h3><small>History</small></h3>
       
       <div class="panel-group" id="accordion">
-	{{#each option in model itemController="option"}}
-	<div class="panel panel-default">
-	  <div class="panel-heading">
-	    <h4 class="panel-title">
-	      <a data-toggle="collapse" data-parent="#accordion" {{bind-attr href=option.panel_href}}>
-		{{option.type_string}} option <small>{{option.timestamp}}</small>
-	      </a>
-	    </h4>
-	  </div>
-	  <div {{bind-attr id=option.panel_id}} class="panel-collapse collapse">
-	    <div class="panel-body">
-
-	      <div class="panel panel-default">
-		<div class="panel-heading">Option Parameters</div>
-		<div class="panel-body">
-		  <table class="table">
-		    <tr>
-		      <th class="col-sm-1">Strike Price</th>
-		      <td class="col-sm-2">{{option.strike_price}} {{unit "HKD"}}</td>
-		    </tr>
-		    <tr>
-		      <th>Maturity</th>
-		      <td>{{option.maturity}} {{unit "years"}}</td>
-		    </tr>
-		    <tr>
-		      <th>Risk-free rate</th>
-		      <td>{{option.risk_free_rate}} %</td>
-		    </tr>
-		    {{#if option.averaging_steps}}
-		    <tr>
-		      <th>Averaging steps</th>
-		      <td>{{option.averaging_steps}}</td>
-		    </tr>
-		    {{/if}}
-		  </table>
-		</div>
-	      </div>
-
-	      {{#if option.is_basket}}
-	      <div class="panel panel-default">
-		<div class="panel-heading">Asset Parameters</div>
-		<div class="panel-body">
-		  <table class="table">
-		    <thead>
-		      <tr>
-			<th class="col-sm-1" />
-			<th class="col-sm-2">Start Price</th>
-			<th class="col-sm-3">Volatility</th>
-		    </thead>
-		    
-		    <tbody>
-		      {{#each asset in option.assets}}
-		      <tr>
-			<th>#{{asset.index}}</th>
-			<td>{{asset.start_price}} {{unit "HKD"}}</td>
-			<td>{{asset.volatility}} %</td>
-		      </tr>
-		      {{/each}}
-		    </tbody>
-		  </table>
-		</div>
-	      </div>
-
-	      <div class="panel panel-default">
-		<div class="panel-heading">Asset Correlations</div>
-		<div class="panel-body">
-		  <table class="table">
-		    <thead>
-		      <tr>
-			<th class="col-sm-1"></th>
-			{{#each correlation_row in option.correlations}}
-			<th {{bind-attr class=correlation_row.column_class}}>#{{correlation_row.row_index}}</th>
-			{{/each}}
-		      </tr>
-		    </thead>
-		    
-		    <tbody>
-		      {{#each correlation_row in option.correlations}}
-		      <tr>
-			<th>#{{correlation_row.row_index}}</th>
-			{{#each correlation in correlation_row.row}}
-			<td {{bind-attr class="correlation.is_required::text-muted"}}>{{correlation.value}} %</td>
-			{{/each}}
-		      </tr>
-		      {{/each}}
-		    </tbody>
-		  </table>
-		</div>
-	      </div>
-	      {{else}}
-	      <div class="panel panel-default">
-		<div class="panel-heading">Asset Parameters</div>
-		<div class="panel-body">
-		  <table class="table">
-		    <tr>
-		      <th class="col-sm-1">Start Price</th>
-		      <td class="col-sm-2">{{option.start_price}} {{unit "HKD"}}</td>
-		    </tr>
-		    <tr>
-		      <th>Volatility</th>
-		      <td>{{option.volatility}} %</td>
-		    </tr>
-		  </table>
-		</div>
-	      </div>
-	      {{/if}}
-
-	      <div class="panel panel-default">
-		<div class="panel-heading">Pricing Results</div>
-		<div class="panel-body">
-		  {{#if option.priced}}
-		  <table class="table">
-		    <tr>
-		      <th class="col-sm-1">Option Price</th>
-		      <td class="col-sm-2">{{option.price}} {{unit "HKD"}}</td>
-		    </tr>
-		    <tr>
-		      <th>Confidence Interval</th>
-		      <td>{{option.confidence_interval.[0]}} - {{option.confidence_interval.[1]}} {{unit "HKD"}} ({{interval_size option.confidence_interval}} {{unit "HKD"}})</td>
-		    </tr>
-		    {{#if option.is_monte_carlo}}
-		    <tr>
-		      <th>Monte Carlo samples</th>
-		      <td>{{option.samples}}</td>
-		    </tr>
-		    {{/if}}
-		  </table>
-		  {{else}}
-		  <div class="progress progress-striped active">
-		    <div class="progress-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%;">		      
-		      <span>
-			{{#if option.processing}}
-			Processing
-			{{else}}
-			Queued
-			{{/if}}
-		      </span>
-		    </div>
-		  </div>
-		  {{/if}}
-		</div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
+	{{#each option in options_history itemController="option"}}
+	{{partial "option"}}
 	{{/each}}
-      </div>      
-    </div>    
+      </div>
+    </div>
+    {{/if}}
   </script>
 
   <script type="text/x-handlebars" data-template-name="bootstrap-switch">
