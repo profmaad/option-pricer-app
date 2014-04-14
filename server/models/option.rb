@@ -15,12 +15,17 @@ class Option
   field :strike_price, type: Float
   field :maturity, type: Float
   field :risk_free_rate, type: Float
+  field :averaging_steps, type: Integer
 
   field :correlations, type: Array
 
   field :price, type: Float
   field :confidence_interval, type: Array
   field :samples, type: Integer
+
+  def is_basket?
+    return (self.type =~ /^basket_/)
+  end
 
   def to_ember_json
     option_json = {}
@@ -34,11 +39,13 @@ class Option
 
     option_json['timestamp'] = self.timestamp.to_s
 
+    option_json['processing'] = self.processing
     option_json['priced'] = self.priced
 
     option_json['strike_price'] = self.strike_price
     option_json['maturity'] = self.maturity
     option_json['risk_free_rate'] = self.risk_free_rate
+    option_json['averaging_steps'] = self.averaging_steps
 
     option_json['price'] = self.price
     option_json['confidence_interval'] = self.confidence_interval

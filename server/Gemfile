@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
+gem 'rack'
+
 gem 'mongoid'
 
 gem 'sinatra'
@@ -7,3 +9,5 @@ gem 'sinatra'
 group :development do
   gem 'rerun'
 end
+
+gem 'sidekiq'

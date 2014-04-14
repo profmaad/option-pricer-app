@@ -1,7 +1,6 @@
 require 'sinatra'
 require 'mongoid'
 require 'json'
-#require 'sinatra/reloader' if development?
 
 require 'pp'
 
@@ -9,10 +8,11 @@ puts File.expand_path(File.dirname(__FILE__) + '/../client')
 set :public_folder, File.expand_path(File.dirname(__FILE__) + '/../client')
 
 require_relative 'models/option'
+require_relative 'workers/pricing_worker'
 
 Mongoid.load!('mongoid.yml')
 
-if(Option.all.size == 0)
+if(false and Option.all.size == 0)
   Option.create([
                  {
                    type: 'european',
@@ -116,6 +116,8 @@ get '/api/options/:id', :provides => :json do
 
   if(option)
     option_json, assets_json = option.to_ember_json
+    pp option_json
+
     return {option: option_json, assets: assets_json}.to_json
   else
     status 404
@@ -131,16 +133,16 @@ post '/api/options', :provides => :json do
 
   new_assets = json['assets'].map do |asset|
     {
-      index: asset['index'],
-      start_price: asset['start_price'],
-      volatility: asset['volatility'],
+      index: asset['index'].to_i,
+      start_price: asset['start_price'].to_f,
+      volatility: asset['volatility'].to_f,
     }
   end
   pp new_assets
 
   new_correlations = json['correlations'].map do |row|
     row.map do |value|
-      value['value']
+      value['value'].to_f
     end
   end
   pp new_correlations
@@ -151,18 +153,20 @@ post '/api/options', :provides => :json do
                                control_variate: json['control_variate'],
                                timestamp: Time.now,
                                priced: false,
-                               strike_price: json['strike_price'],
-                               maturity: json['maturity'],
-                               risk_free_rate: json['risk_free_rate'],
+                               strike_price: json['strike_price'].to_f,
+                               maturity: json['maturity'].to_f,
+                               risk_free_rate: json['risk_free_rate'].to_f,
+                               averaging_steps: json['averaging_steps'].to_i,
                                correlations: new_correlations,
-                               samples: json['samples'],
+                               samples: json['samples'].to_i,
                                assets: new_assets,
                              })
-  pp new_option
+
+  PricingWorker.perform_async(new_option._id.to_s)
 
   option_json, assets_json = new_option.to_ember_json
   val = {option: option_json, assets: assets_json}
-  pp val
+
   return val.to_json
 end
 

@@ -240,6 +240,15 @@ App.OptionsNewController = Ember.Controller.extend({
 	    {
 		this.get('model.assets').removeAt(this.get('model.assets.length')-1);
 	    }
+	    else { return; }
+
+	    var number_of_assets = this.get('model.assets.length');
+
+	    this.get('model.correlations').removeAt(number_of_assets);
+	    for(var asset = 0; asset < number_of_assets; asset++)
+	    {
+		this.get('model.correlations').objectAt(asset).removeAt(number_of_assets);
+	    }
 	},
 	create_option: function() {
 	    console.log(this.get('model.type'));
@@ -272,6 +281,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	    
 	    function transitionToIndex(option) {
 		self.get('model').reload();
+		self.get('model').setup_reload_timer();
 		self.transitionToRoute('options.index');
 	    }
 	    
@@ -280,7 +290,11 @@ App.OptionsNewController = Ember.Controller.extend({
 	    }
 	    
 	    this.get('model').save().then(transitionToIndex).catch(failure);
-	}
+	},
+	cancel: function() {
+	    this.get('model').deleteRecord();
+	    this.transitionToRoute('options.index');
+	},
     },
 });
 
@@ -310,7 +324,35 @@ App.OptionController = Ember.ObjectController.extend({
 	    return 'Arithmetic Basket';
 	    break;
 	}
-    }.property('type'),
+    }.property('model.type'),
+    direction_string: function() {
+	switch(this.get('model.direction'))
+	{
+	case 'call':
+	    return 'Call';
+	    break;
+	case 'put':
+	    return 'Put';
+	    break;	    
+	}
+    }.property('model.direction'),
+    control_variate_string: function() {
+	switch(this.get('model.control_variate'))
+	{
+	case 'none':
+	    return 'None';
+	    break;
+	case 'geometric':
+	    return 'Geometric';
+	    break;
+	case 'geometric_adjusted_strike':
+	    return 'Geometric with adjusted strike';
+	    break;
+	}
+    }.property('model.control_variate'),
+    is_processing: function() {
+	return (this.get('processing') && !this.get('priced'));
+    }.property('processing', 'priced'),
     is_asian: function() {
 	if(this.get('type').search('^asian') >= 0) { return true; }
 	else { return false; }
@@ -382,20 +424,20 @@ App.OptionsIndexController = Ember.ArrayController.extend({
     processing_options: function() {
 	console.log('PROCESSING OPTIONS');
 	return this.filter(function(option) {
-	    return option.get('processing');
-	});
+	    return (option.get('processing') && !option.get('priced'));
+	}).sortBy('timestamp').reverseObjects();
     }.property('@each.processing'),
     queued_options: function() {
 	console.log('QUEUED OPTIONS');
 	return this.filter(function(option) {
 	    return (!option.get('processing') && !option.get('priced'));
-	});
+	}).sortBy('timestamp').reverseObjects();
     }.property('@each.processing', 'model.@each.priced'),
     options_history: function() {
 	console.log('OPTIONS HISTORY');
 	return this.filter(function(option) {
 	    return option.get('priced');
-	});
+	}).sortBy('timestamp').reverseObjects();
     }.property('@each.priced'),
 });
 
@@ -407,7 +449,6 @@ App.Router.map(function() {
 
 App.OptionsRoute = Ember.Route.extend({
     model: function() {
-	//return this.store.find('option', {completed: true});
 	return this.store.find('option');
     }
 });
@@ -427,6 +468,17 @@ Ember.Handlebars.helper('index1', function(value, options) {
 Ember.Handlebars.helper('unit', function(unit, options) {
     var escaped = Handlebars.Utils.escapeExpression(unit);
     return new Handlebars.SafeString('<span class="text-muted">' + escaped + '</span>');
+});
+Ember.Handlebars.helper('money', function(value, options) {
+    if(value && value.value) { value = value.value; }
+    if(typeof value == 'string') { value = parseFloat(value); }
+
+    return +value.toFixed(5);
+});
+Ember.Handlebars.helper('pretty_big_number', function(value, options) {
+    value = Math.log(value)/Math.log(10);
+
+    return App.big_number_formatter(value);
 });
 
 App.CorrelationView = Ember.TextField.extend({
@@ -472,50 +524,57 @@ App.SwitchView = Ember.View.extend({
     }.observes('disabled')
 });
 
+App.big_number_formatter = function(value, be_funny) {
+    switch(value)
+    {
+    case 0:
+    case 1:
+    case 2:
+	return Math.pow(10, value).toString();
+	break;
+    case 3:
+	return 'One thousand';
+	break;
+    case 4:
+	return '10 thousand';
+	break;
+    case 5:
+	return '100 thousand';
+	break;
+    case 6:
+	return 'One million';
+	break;
+    case 7:
+	return '10 million';
+	break;
+    case 8:
+	return '100 million';
+	break;
+    case 9:
+	return '1 billion';
+	break;
+    case 10:
+	return '10 billion';
+	break;
+    case 11:
+	return '100 billion';
+	break;
+    case 12:
+	if(be_funny) { return '1 trillion, might take a while...';}
+	else { return '1 trillion'; }
+	break;
+    default:
+	return Math.pow(10, value).toString();
+    }
+};
+
 App.LogSliderView = Ember.View.extend({
     templateName: 'bootstrap-slider',
     element_selector: '.ember-bootstrap-slider',
     didInsertElement: function() {
 	this.$(this.get('element_selector')).slider({
 	    formater: function(value) {
-		switch(value)
-		{
-		case 0:
-		case 1:
-		case 2:
-		    return Math.pow(10, value).toString();
-		    break;
-		case 3:
-		    return 'One thousand';
-		    break;
-		case 4:
-		    return '10 thousand';
-		    break;
-		case 5:
-		    return '100 thousand';
-		    break;
-		case 6:
-		    return 'One million';
-		    break;
-		case 7:
-		    return '10 million';
-		    break;
-		case 8:
-		    return '100 million';
-		    break;
-		case 9:
-		    return '1 billion';
-		    break;
-		case 10:
-		    return '10 billion';
-		    break;
-		case 11:
-		    return '100 billion';
-		    break;
-		case 12:
-		    return '1 trillion, might take a while...';
-		    break;
-		}
+		return App.big_number_formatter(value, true);
 	    }
 	});
 	var view = this;
