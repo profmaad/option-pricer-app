@@ -3,7 +3,7 @@ option-pricer-app
 
 Web-based user interface for the OpenCL option pricer
 
-This is a set of components to provide a user interface for the OpenCL option pricer at TODO.
+This is a set of components to provide a user interface for the OpenCL option pricer at https://github.com/profmaad/opencl-option-pricer.
 
 The UI is based on [ember.js](http://emberjs.com/), also using the following components:
 * [Bootstrap](http://getbootstrap.com/)
@@ -37,3 +37,8 @@ Note that the sidekiq worker must know the path to the opencl_option_pricer bina
 at the start of the file server/workers/pricing_worker.rb.
 
 The app can then be accessed at http://localhost:9292/index.html by default.
+
+Copyright
+=========
+
+Copyright 2014 Maximilian Wolter (Prof. MAAD)
