@@ -49,6 +49,7 @@ App.OptionsNewController = Ember.Controller.extend({
 	{name: 'Geometric Basket', code: 'basket_geometric'},
 	{name: 'Arithmetic Basket', code: 'basket_arithmetic'},
     ],
+    validation_errors: null,
     is_basket: function() {
 	if(this.get('model.type') && this.get('model.type').search('^basket') >= 0) { return true; }
 	else { return false; }
@@ -275,6 +276,17 @@ App.OptionsNewController = Ember.Controller.extend({
 		{
 		    console.log('Correlations ('+(asset+1)+', '+(column+1)+'): ' + (row.objectAt(column).value ? row.objectAt(column).value: row.objectAt(column)));
 		}
+	    }
+
+	    var validation_errors = this.get('model').validate();
+	    if(validation_errors.length > 0)
+	    {
+		this.set('validation_errors', Ember.A(validation_errors));
+		return;
+	    }
+	    else
+	    {
+		this.set('validation_errors', null);
 	    }
 
 	    var self = this;

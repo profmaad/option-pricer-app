@@ -226,7 +226,19 @@
 	      </div>
 	    </div>
 	    {{/if}}
+	  </fieldset>
 
+	  {{#if controller.validation_errors}}
+	  <div class="alert alert-danger">
+	    <p><strong>There are errors in your input parameters:</strong></p>
+	    <ul>
+	      {{#each error in controller.validation_errors}}
+	      <li>{{error}}</li>
+	      {{/each}}
+	    </ul>
+	  </div>
+	  {{/if}}
+	  
 	  <div class="form-group">
 	    <div class="col-sm-offset-2 col-sm-4">
 	      <button {{action create_option}} type="submit" class="btn btn-primary">Create</button>
