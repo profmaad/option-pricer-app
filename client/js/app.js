@@ -578,6 +578,7 @@ App.LogSliderView = Ember.View.extend({
 	    }
 	});
 	var view = this;
+	view.set('value', Math.pow(10, this.get('value')));
 	this.$(this.get('element_selector')).on('slideStop', function(event) {
 	    view.set('value', Math.pow(10, event.value));
 	});
