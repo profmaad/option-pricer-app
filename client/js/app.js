@@ -525,7 +525,7 @@ App.SwitchView = Ember.View.extend({
 });
 
 App.big_number_formatter = function(value, be_funny) {
-    switch(value)
+    switch(Math.round(value))
     {
     case 0:
     case 1:
